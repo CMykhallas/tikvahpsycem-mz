@@ -1,0 +1,386 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Ultra Professional Color Palette - Institutional Grade */
+    --primary: 210 100% 12%;           /* Deep Navy - Authority & Trust */
+    --primary-foreground: 0 0% 98%;
+    --primary-hover: 210 100% 8%;
+    --primary-light: 210 100% 25%;
+    
+    --secondary: 220 14% 96%;          /* Ultra Light Gray - Elegance */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-dark: 220 14% 91%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 14 100% 57%;             /* Mozambique Flag Red - Heritage */
+    --accent-foreground: 0 0% 98%;
+    --accent-light: 14 100% 65%;
+    
+    --success: 142 71% 45%;            /* Professional Green - Trust */
+    --success-foreground: 0 0% 98%;
+    
+    --warning: 45 93% 47%;             /* Mozambique Flag Yellow - Energy */
+    --warning-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 210 100% 12%;
+
+    --radius: 0.75rem;
+    
+    /* Ultra Professional Gradients - World-Class Institution Level */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 12%), hsl(210 100% 25%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 14% 96%), hsl(220 14% 91%));
+    --gradient-accent: linear-gradient(135deg, hsl(14 100% 57%), hsl(14 100% 65%));
+    --gradient-success: linear-gradient(135deg, hsl(142 71% 45%), hsl(142 71% 38%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 12%) 0%, hsl(14 100% 57%) 100%);
+    --gradient-elegant: linear-gradient(145deg, hsl(220 14% 96%) 0%, hsl(210 100% 25%) 100%);
+    
+    /* Ultra Professional Shadows - Institutional Grade */
+    --shadow-primary: 0 25px 50px -12px hsl(210 100% 12% / 0.25);
+    --shadow-accent: 0 20px 40px -8px hsl(14 100% 57% / 0.3);
+    --shadow-elegant: 0 32px 64px -24px hsl(222.2 84% 4.9% / 0.12);
+    --shadow-card: 0 16px 32px -8px hsl(220 13% 91% / 0.4);
+    --shadow-floating: 0 40px 80px -32px hsl(210 100% 12% / 0.2);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Dark Mode Ultra Professional Palette */
+    --primary: 210 100% 65%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary-hover: 210 100% 70%;
+    --primary-light: 210 100% 75%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-dark: 217.2 32.6% 12%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 14 100% 67%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-light: 14 100% 75%;
+    
+    --success: 142 71% 55%;
+    --success-foreground: 222.2 47.4% 11.2%;
+    
+    --warning: 45 93% 57%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 210 100% 65%;
+    
+    /* Dark Mode Ultra Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(210 100% 65%), hsl(210 100% 75%));
+    --gradient-secondary: linear-gradient(135deg, hsl(217.2 32.6% 17.5%), hsl(217.2 32.6% 12%));
+    --gradient-accent: linear-gradient(135deg, hsl(14 100% 67%), hsl(14 100% 75%));
+    --gradient-success: linear-gradient(135deg, hsl(142 71% 55%), hsl(142 71% 48%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 100% 65%) 0%, hsl(14 100% 67%) 100%);
+    --gradient-elegant: linear-gradient(145deg, hsl(217.2 32.6% 17.5%) 0%, hsl(210 100% 75%) 100%);
+    
+    /* Dark Mode Ultra Professional Shadows */
+    --shadow-primary: 0 25px 50px -12px hsl(210 100% 65% / 0.4);
+    --shadow-accent: 0 20px 40px -8px hsl(14 100% 67% / 0.5);
+    --shadow-elegant: 0 32px 64px -24px hsl(0 0% 0% / 0.4);
+    --shadow-card: 0 16px 32px -8px hsl(0 0% 0% / 0.3);
+    --shadow-floating: 0 40px 80px -32px hsl(210 100% 65% / 0.3);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Premium Typography System */
+  h1, h2, h3, h4, h5, h6, .heading {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .sans-serif {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+@layer components {
+  /* Ultra Professional Gradient Backgrounds - World-Class Institution Level */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  .bg-gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+  
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-success {
+    background: var(--gradient-success);
+  }
+  
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .bg-gradient-elegant {
+    background: var(--gradient-elegant);
+  }
+
+  /* Ultra Professional Shadow System - Institutional Grade */
+  .shadow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+  
+  .shadow-accent {
+    box-shadow: var(--shadow-accent);
+  }
+  
+  .shadow-elegant {
+    box-shadow: var(--shadow-elegant);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-floating {
+    box-shadow: var(--shadow-floating);
+  }
+
+  /* Ultra Professional Animations - World-Class Level */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+  
+  .animate-fade-in-delayed {
+    animation: fadeInDelayed 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  /* Ultra Professional Hover Effects - Institutional Level */
+  .hover-lift {
+    @apply transition-all duration-500 hover:scale-105 hover:shadow-floating;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-primary;
+  }
+  
+  .hover-elegant {
+    @apply transition-all duration-500 hover:shadow-elegant hover:-translate-y-1;
+  }
+  
+  .hover-institutional {
+    @apply transition-all duration-300 hover:shadow-card hover:scale-102;
+  }
+
+  /* Ultra Professional Button Styles - World-Class Institution */
+  .btn-primary-gradient {
+    @apply bg-gradient-primary text-primary-foreground shadow-primary hover:shadow-floating hover:scale-105 transition-all duration-300;
+  }
+  
+  .btn-accent-gradient {
+    @apply bg-gradient-accent text-accent-foreground shadow-accent hover:shadow-primary hover:scale-105 transition-all duration-300;
+  }
+  
+  .btn-elegant {
+    @apply bg-gradient-elegant text-primary shadow-elegant hover:shadow-floating hover:scale-105 transition-all duration-500;
+  }
+  
+  .btn-institutional {
+    @apply bg-primary text-primary-foreground shadow-card hover:shadow-floating hover:bg-primary-hover transition-all duration-300;
+  }
+
+  /* Ultra Professional Contact Cards - Institutional Design */
+  .contact-card {
+    @apply bg-gradient-elegant border border-border/50 rounded-xl p-6 hover-institutional backdrop-blur-sm;
+  }
+  
+  .contact-card-premium {
+    @apply bg-gradient-primary text-primary-foreground rounded-xl p-8 shadow-floating hover:shadow-primary hover:scale-105 transition-all duration-500;
+  }
+  
+  .contact-hero {
+    @apply bg-gradient-hero text-white min-h-[60vh] flex items-center justify-center relative overflow-hidden;
+  }
+  
+  .contact-hero::before {
+    content: '';
+    @apply absolute inset-0 bg-black/20 backdrop-blur-[2px];
+  }
+}
+
+@layer utilities {
+  /* Ultra Professional Custom Keyframes - World-Class Institution Level */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInDelayed {
+    0% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    60% {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes professionalPulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.9;
+    }
+  }
+  
+  /* Ultra Professional Text Gradients - Institutional Grade */
+  .text-gradient-primary {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-accent {
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-hero {
+    background: var(--gradient-hero);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-elegant {
+    background: var(--gradient-elegant);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Ultra Professional Utility Classes - World-Class Institution */
+  .backdrop-professional {
+    backdrop-filter: blur(8px) saturate(180%);
+    background-color: hsla(0, 0%, 100%, 0.85);
+  }
+  
+  .backdrop-institutional {
+    backdrop-filter: blur(12px) saturate(200%);
+    background-color: hsla(220, 14%, 96%, 0.9);
+  }
+  
+  .scale-102 {
+    transform: scale(1.02);
+  }
+  
+  .rotate-y-6 {
+    transform: rotateY(6deg);
+  }
+}
