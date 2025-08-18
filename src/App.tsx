@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +29,8 @@ import NotFound from "./pages/NotFound";
 import Approach from "./pages/Approach";
 import Administration from "./pages/Administration";
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +65,8 @@ const App = () => (
             <Route path="/appointment" element={<Appointment />} />
             <Route path="/obrigado" element={<Obrigado />} />
             <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
