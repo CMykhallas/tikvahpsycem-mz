@@ -8,13 +8,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, MessageSquare } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Feedback = () => {
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!privacyAccepted) {
+      alert("Por favor, aceite a Política de Privacidade para continuar.");
+      return;
+    }
     // Handle form submission
   };
 
@@ -162,9 +168,33 @@ const Feedback = () => {
                 </label>
               </div>
 
+              {/* Privacy Policy Checkbox */}
+              <div className="flex items-start space-x-3 p-4 bg-slate-50 rounded-lg">
+                <input 
+                  type="checkbox" 
+                  id="privacy-consent-feedback" 
+                  checked={privacyAccepted}
+                  onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                  className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 mt-1"
+                  required
+                />
+                <label htmlFor="privacy-consent-feedback" className="text-sm text-slate-600 leading-relaxed">
+                  Aceito a{" "}
+                  <Link 
+                    to="/politica-de-privacidade" 
+                    target="_blank"
+                    className="text-teal-600 hover:text-teal-700 underline font-medium"
+                  >
+                    Política de Privacidade
+                  </Link>
+                  {" "}e autorizo o processamento dos meus dados pessoais para fins de melhoria dos serviços. *
+                </label>
+              </div>
+
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700"
+                disabled={!privacyAccepted}
               >
                 Enviar Feedback
               </Button>

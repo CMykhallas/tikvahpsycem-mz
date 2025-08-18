@@ -19,7 +19,7 @@ import {
   Star,
   CheckCircle
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
 
@@ -31,9 +31,16 @@ import maputoAv24Julho from "@/assets/maputo-av-24-julho.jpg";
 const Contact = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!privacyAccepted) {
+      toast.error("Por favor, aceite a Política de Privacidade para continuar.");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     toast.loading("Enviando mensagem...", { id: "contact-form" });
@@ -47,6 +54,7 @@ const Contact = () => {
       
       const form = e.target as HTMLFormElement;
       form.reset();
+      setPrivacyAccepted(false);
       navigate("/obrigado");
     } catch (error) {
       toast.error("Erro ao enviar mensagem. Por favor, tente novamente.", { 
@@ -232,12 +240,36 @@ const Contact = () => {
                     />
                   </div>
 
+                  {/* Privacy Policy Checkbox */}
+                  <div className="flex items-start space-x-3 p-4 bg-secondary/20 rounded-lg">
+                    <input 
+                      type="checkbox" 
+                      id="privacy-consent" 
+                      checked={privacyAccepted}
+                      onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                      className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary mt-1"
+                      disabled={isSubmitting}
+                      required
+                    />
+                    <label htmlFor="privacy-consent" className="text-sm text-muted-foreground leading-relaxed">
+                      Aceito a{" "}
+                      <Link 
+                        to="/politica-de-privacidade" 
+                        target="_blank"
+                        className="text-primary hover:text-primary/80 underline font-medium"
+                      >
+                        Política de Privacidade
+                      </Link>
+                      {" "}e autorizo o processamento dos meus dados pessoais para fins de contacto e prestação de serviços. *
+                    </label>
+                  </div>
+
                   <Button 
                     type="submit" 
                     variant="gradient"
                     size="lg"
                     className="w-full"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !privacyAccepted}
                   >
                     {isSubmitting ? (
                       <>

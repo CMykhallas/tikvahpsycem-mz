@@ -296,7 +296,7 @@ export const Footer = () => {
             </div>
             
             <div className="flex flex-wrap items-center gap-6 text-xs text-white/60">
-              <Link to="/privacy" className="hover:text-white transition-colors">
+              <Link to="/politica-de-privacidade" className="hover:text-white transition-colors">
                 Política de Privacidade
               </Link>
               <Link to="/terms" className="hover:text-white transition-colors">

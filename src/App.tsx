@@ -27,6 +27,7 @@ import Obrigado from "./pages/Obrigado";
 import NotFound from "./pages/NotFound";
 import Approach from "./pages/Approach";
 import Administration from "./pages/Administration";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
           <Route path="/career" element={<Career />} />
           <Route path="/appointment" element={<Appointment />} />
           <Route path="/obrigado" element={<Obrigado />} />
+          <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
