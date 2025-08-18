@@ -1,9 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SecurityProvider } from "@/components/SecurityProvider";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -32,40 +32,42 @@ import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/values" element={<Values />} />
-          <Route path="/mission" element={<Mission />} />
-          <Route path="/approach" element={<Approach />} />
-          <Route path="/administration" element={<Administration />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/services/psicoterapia" element={<Psicoterapia />} />
-          <Route path="/services/consultoria" element={<Consultoria />} />
-          <Route path="/services/cursos" element={<Cursos />} />
-          <Route path="/services/workshops" element={<Workshops />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/location" element={<Location />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/career" element={<Career />} />
-          <Route path="/appointment" element={<Appointment />} />
-          <Route path="/obrigado" element={<Obrigado />} />
-          <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <SecurityProvider>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/values" element={<Values />} />
+            <Route path="/mission" element={<Mission />} />
+            <Route path="/approach" element={<Approach />} />
+            <Route path="/administration" element={<Administration />} />
+            <Route path="/services" element={<Services />} />
+            <Route path="/services/psicoterapia" element={<Psicoterapia />} />
+            <Route path="/services/consultoria" element={<Consultoria />} />
+            <Route path="/services/cursos" element={<Cursos />} />
+            <Route path="/services/workshops" element={<Workshops />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/location" element={<Location />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/career" element={<Career />} />
+            <Route path="/appointment" element={<Appointment />} />
+            <Route path="/obrigado" element={<Obrigado />} />
+            <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </SecurityProvider>
 );
 
 export default App;

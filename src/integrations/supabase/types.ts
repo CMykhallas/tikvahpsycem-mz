@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          ad_group_id: string | null
+          campaign_id: string | null
+          created_at: string
+          email: string
+          id: string
+          keyword: string | null
+          metadata: Json | null
+          name: string | null
+          phone: string | null
+          source: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          ad_group_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          keyword?: string | null
+          metadata?: Json | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ad_group_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          keyword?: string | null
+          metadata?: Json | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      webhook_logs: {
+        Row: {
+          created_at: string
+          endpoint: string
+          error_message: string | null
+          headers: Json | null
+          id: string
+          ip_address: unknown | null
+          method: string
+          payload: Json | null
+          processing_time_ms: number | null
+          response_status: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          error_message?: string | null
+          headers?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          method: string
+          payload?: Json | null
+          processing_time_ms?: number | null
+          response_status?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          error_message?: string | null
+          headers?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          method?: string
+          payload?: Json | null
+          processing_time_ms?: number | null
+          response_status?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
