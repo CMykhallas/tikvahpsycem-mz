@@ -207,52 +207,6 @@ div[data-lovable-overlay] {
   display: none !important;
 }
 
-/* Estilos para componentes específicos */
-.blog-content {
-  @apply prose prose-lg max-w-none;
-}
-
-.blog-content h1 {
-  @apply text-4xl font-bold mb-6;
-}
-
-.blog-content h2 {
-  @apply text-3xl font-bold mb-4 mt-8;
-}
-
-.blog-content h3 {
-  @apply text-2xl font-semibold mb-3 mt-6;
-}
-
-.blog-content p {
-  @apply mb-4 leading-relaxed;
-}
-
-.blog-content ul, .blog-content ol {
-  @apply mb-4 pl-6;
-}
-
-.blog-content li {
-  @apply mb-2;
-}
-
-.blog-content blockquote {
-  @apply border-l-4 border-primary pl-6 italic my-6;
-}
-
-.blog-content code {
-  @apply bg-muted px-2 py-1 rounded text-sm font-mono;
-}
-
-.blog-content pre {
-  @apply bg-muted p-4 rounded-lg overflow-x-auto my-6;
-}
-
-/* Melhorias de acessibilidade */
-.focus-visible:focus {
-  @apply outline-2 outline-offset-2 outline-primary;
-}
-
 /* Loading states */
 .loading-shimmer {
   background: linear-gradient(90deg, 
@@ -274,4 +228,43 @@ div[data-lovable-overlay] {
   .text-5xl { @apply text-4xl; }
   .text-6xl { @apply text-5xl; }
   .text-7xl { @apply text-6xl; }
+}
+
+/* Customização do Typography Plugin para nosso design system */
+@layer components {
+  .prose {
+    @apply text-foreground;
+  }
+  
+  .prose h1 {
+    @apply text-foreground font-heading;
+  }
+  
+  .prose h2 {
+    @apply text-foreground font-heading;
+  }
+  
+  .prose h3 {
+    @apply text-foreground font-heading;
+  }
+  
+  .prose strong {
+    @apply text-foreground font-semibold;
+  }
+  
+  .prose blockquote {
+    @apply border-l-primary text-muted-foreground;
+  }
+  
+  .prose code {
+    @apply bg-muted text-muted-foreground px-1 py-0.5 rounded;
+  }
+  
+  .prose pre {
+    @apply bg-muted text-muted-foreground;
+  }
+  
+  .prose a {
+    @apply text-primary hover:text-primary/80 no-underline;
+  }
 }
