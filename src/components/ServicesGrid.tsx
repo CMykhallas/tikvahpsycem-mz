@@ -13,8 +13,8 @@ export const ServicesGrid: React.FC = () => {
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            animate={{ pulse: 1 }}
-            transition={{ duration: 1, repeat: Infinity }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             className="h-64 bg-muted rounded-lg"
           />
         ))}
