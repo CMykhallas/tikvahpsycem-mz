@@ -14,6 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          client_name: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          phone: string
+          preferred_date: string
+          service_type: string
+          status: string | null
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          phone: string
+          preferred_date: string
+          service_type: string
+          status?: string | null
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string
+          preferred_date?: string
+          service_type?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
+      blog_images: {
+        Row: {
+          alt_text: string
+          blog_slug: string
+          created_at: string
+          id: string
+          image_url: string
+          position: number | null
+          updated_at: string
+        }
+        Insert: {
+          alt_text: string
+          blog_slug: string
+          created_at?: string
+          id?: string
+          image_url: string
+          position?: number | null
+          updated_at?: string
+        }
+        Update: {
+          alt_text?: string
+          blog_slug?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          position?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string | null
+          subject?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           ad_group_id: string | null
@@ -59,6 +158,53 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string | null
+          id: string
+          payment_method: string | null
+          service_id: string | null
+          status: string | null
+          stripe_session_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string | null
+          id?: string
+          payment_method?: string | null
+          service_id?: string | null
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -80,6 +226,42 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string
+          currency: string | null
+          description: string
+          duration_minutes: number | null
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          created_at?: string
+          currency?: string | null
+          description: string
+          duration_minutes?: number | null
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string
+          currency?: string | null
+          description?: string
+          duration_minutes?: number | null
+          id?: string
+          name?: string
+          price?: number
         }
         Relationships: []
       }

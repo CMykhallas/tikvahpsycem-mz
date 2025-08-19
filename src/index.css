@@ -1,21 +1,8 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Hide Lovable edit badge */
-[data-lovable-edit] {
-  display: none !important;
-}
-
-.lovable-edit-button {
-  display: none !important;
-}
-
-*[class*="lovable"] {
-  display: none !important;
-}
 
 @layer base {
   :root {
@@ -25,7 +12,7 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 84% 4.9%;
@@ -37,13 +24,13 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
   }
 
   .dark {
@@ -53,8 +40,8 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
@@ -65,7 +52,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 224.3 76.3% 94.1%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -88,108 +75,203 @@
   }
 }
 
-@layer components {
-  /* Semantic Design System Colors - HSL Values */
-  :root {
-    /* Primary Brand Colors */
-    --gradient-primary: linear-gradient(135deg, hsl(195, 100%, 35%) 0%, hsl(220, 100%, 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(172, 66%, 50%) 0%, hsl(195, 100%, 35%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(172, 66%, 50%) 100%);
-    
-    /* Contextual Colors */
-    --color-primary: hsl(195, 100%, 35%);
-    --color-accent: hsl(172, 66%, 50%);
-    --color-success: hsl(142, 71%, 45%);
-    --color-warning: hsl(45, 93%, 47%);
-    --color-error: hsl(0, 72%, 51%);
-    
-    /* Semantic Surfaces */
-    --surface-elevated: hsl(0, 0%, 100%);
-    --surface-subtle: hsl(210, 20%, 98%);
-    --surface-muted: hsl(210, 17%, 95%);
-  }
+/* Gradientes personalizados */
+.text-gradient-primary {
+  @apply bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent;
+}
 
-  /* Enhanced Typography Scale */
-  .text-gradient-elegant {
-    @apply bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 bg-clip-text text-transparent;
-  }
+.text-gradient-accent {
+  @apply bg-gradient-to-r from-accent to-orange-500 bg-clip-text text-transparent;
+}
 
-  /* Component Utilities */
-  .btn-primary-gradient {
-    @apply bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
-  }
+.bg-gradient-primary {
+  @apply bg-gradient-to-r from-primary to-blue-600;
+}
 
-  .shadow-floating {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+.bg-gradient-accent {
+  @apply bg-gradient-to-r from-accent to-orange-500;
+}
 
-  .shadow-accent {
-    box-shadow: 0 4px 14px 0 rgba(20, 184, 166, 0.25);
+/* Animações customizadas */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
   }
-
-  .backdrop-institutional {
-    backdrop-filter: blur(12px);
-    background-color: rgba(255, 255, 255, 0.95);
-  }
-
-  .hover-institutional {
-    @apply hover:bg-slate-50 hover:text-primary transition-colors duration-200;
-  }
-
-  /* Animation Utilities */
-  @keyframes slide-up {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.3s ease-out;
-  }
-
-  .animate-pulse-slow {
-    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
-  /* Accessibility Enhancements */
-  @media (prefers-reduced-motion: reduce) {
-    .animate-slide-up,
-    .animate-pulse-slow {
-      animation: none;
-    }
-    
-    .transition-all,
-    .transition-colors,
-    .transition-transform {
-      transition: none;
-    }
-  }
-
-  /* High Contrast Mode Support */
-  @media (prefers-contrast: high) {
-    .bg-gradient-primary {
-      background: hsl(195, 100%, 25%);
-    }
-    
-    .text-slate-600 {
-      color: hsl(215, 25%, 25%);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Focus Management for Accessibility */
-.focus\:ring-accent:focus {
-  --tw-ring-color: hsl(172, 66%, 50%);
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Print Styles */
-@media print {
-  .no-print {
-    display: none !important;
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 1s ease-out;
+}
+
+/* Efeitos de hover elegantes */
+.hover-elegant {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.hover-elegant:hover {
+  @apply transform scale-[1.02] shadow-xl;
+}
+
+/* Estilos para hero sections */
+.hero-bg {
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+}
+
+.services-hero {
+  background-image: url('/placeholder.svg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Estilo para botões com gradiente */
+.btn-gradient {
+  @apply bg-gradient-to-r from-primary to-accent text-white font-semibold py-3 px-8 rounded-full;
+  @apply hover:from-primary/90 hover:to-accent/90 transform hover:scale-105 transition-all duration-300;
+  @apply shadow-lg hover:shadow-xl;
+}
+
+/* Otimizações de performance */
+.will-change-transform {
+  will-change: transform;
+}
+
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Skip links para acessibilidade */
+.skip-link {
+  @apply absolute -top-full left-6 z-50 px-4 py-2 bg-primary text-primary-foreground;
+  @apply focus:top-6 transition-all duration-200;
+}
+
+/* Suporte para motion reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  .text-muted-foreground {
+    @apply text-foreground;
+  }
+  
+  .border {
+    @apply border-2;
+  }
+}
+
+/* Remover ícone flutuante do Lovable */
+iframe[src*="lovable"] {
+  display: none !important;
+}
+
+button[aria-label*="Edit with Lovable"] {
+  display: none !important;
+}
+
+div[data-lovable-overlay] {
+  display: none !important;
+}
+
+.lovable-edit-button {
+  display: none !important;
+}
+
+/* Estilos para componentes específicos */
+.blog-content {
+  @apply prose prose-lg max-w-none;
+}
+
+.blog-content h1 {
+  @apply text-4xl font-bold mb-6;
+}
+
+.blog-content h2 {
+  @apply text-3xl font-bold mb-4 mt-8;
+}
+
+.blog-content h3 {
+  @apply text-2xl font-semibold mb-3 mt-6;
+}
+
+.blog-content p {
+  @apply mb-4 leading-relaxed;
+}
+
+.blog-content ul, .blog-content ol {
+  @apply mb-4 pl-6;
+}
+
+.blog-content li {
+  @apply mb-2;
+}
+
+.blog-content blockquote {
+  @apply border-l-4 border-primary pl-6 italic my-6;
+}
+
+.blog-content code {
+  @apply bg-muted px-2 py-1 rounded text-sm font-mono;
+}
+
+.blog-content pre {
+  @apply bg-muted p-4 rounded-lg overflow-x-auto my-6;
+}
+
+/* Melhorias de acessibilidade */
+.focus-visible:focus {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* Loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted-foreground) / 0.1) 50%, 
+    hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Melhorias para dispositivos móveis */
+@media (max-width: 768px) {
+  .text-4xl { @apply text-3xl; }
+  .text-5xl { @apply text-4xl; }
+  .text-6xl { @apply text-5xl; }
+  .text-7xl { @apply text-6xl; }
 }

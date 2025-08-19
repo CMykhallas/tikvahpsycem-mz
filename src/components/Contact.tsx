@@ -1,179 +1,228 @@
 
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Phone, Mail, MapPin, Clock, MessageCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { useContactForm } from "@/hooks/useContactForm";
 
 export const Contact = () => {
-  const contactInfo = [
-    {
-      title: "Linha Técnica Principal",
-      value: "+258 82 759 2980",
-      description: "Atendimento técnico e agendamentos"
-    },
-    {
-      title: "Linha de Apoio Operacional",
-      value: "+258 82 892 6020 / 778 5043",
-      description: "Informações operacionais e suporte"
-    },
-    {
-      title: "Escritório Central",
-      value: "Avenida 24 de Julho N. 797, 1º andar, B/ Polana Cimento 'A'",
-      description: "Sede Principal - Cidade de Maputo, CEP: 1092"
-    },
-    {
-      title: "Escritório Técnico", 
-      value: "Av. Vlademir Lenine, B/ Maxaquene 'C'",
-      description: "Atendimento Especializado - Maputo"
-    },
-    {
-      title: "Email Suporte Geral",
-      value: "suporte.oficina.psicologo@proton.me",
-      description: "Gestão de questões gerais e suporte técnico"
-    },
-    {
-      title: "Email Administrativo",
-      value: "geral.consultoriotekvah@gmail.com",
-      description: "Correspondência administrativa e agendamentos"
-    },
-    {
-      title: "Email Institucional",
-      value: "ceo.consultoriotekvah@gmail.com",
-      description: "Comunicação institucional e parcerias estratégicas"
-    }
-  ];
+  const { submitContact, isLoading } = useContactForm();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: ""
+  });
 
-  const socialChannels = [
-    { name: "Facebook", handle: "Tikvah Psychological Center & Multiservice" },
-    { name: "Instagram", handle: "@opm_moz" },
-    { name: "Twitter", handle: "@opm_moz" },
-    { name: "TikTok", handle: "@opm_moz" },
-    { name: "WhatsApp", handle: "+258 82 759 2980" }
-  ];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = await submitContact(formData);
+    if (result.success) {
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    }
+  };
 
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section className="py-20 bg-gradient-to-br from-background to-muted/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-6">
-            Entre em <span className="text-teal-600">Contato</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            Entre em <span className="text-gradient-primary">Contacto</span>
           </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Estamos aqui para ajudá-lo. Entre em contato conosco através dos nossos canais oficiais
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Estamos aqui para apoiá-lo. Entre em contacto connosco para mais informações ou para agendar uma consulta.
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div>
-            <Card className="shadow-lg border-0">
-              <CardHeader className="bg-gradient-to-r from-teal-600 to-blue-600 text-white rounded-t-lg">
-                <CardTitle className="text-2xl">Envie sua Mensagem</CardTitle>
+          {/* Formulário de Contacto */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            <Card className="hover-elegant">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MessageCircle className="w-6 h-6 mr-3 text-primary" />
+                  Envie-nos uma Mensagem
+                </CardTitle>
               </CardHeader>
-              <CardContent className="p-8">
-                <form className="space-y-6">
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nome Completo
-                      </label>
-                      <Input 
-                        placeholder="Seu nome completo"
-                        className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Completo *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        required
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Telefone
-                      </label>
-                      <Input 
-                        placeholder="Seu telefone"
-                        className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        required
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
                       />
                     </div>
                   </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Email
-                    </label>
-                    <Input 
-                      type="email"
-                      placeholder="seu@email.com"
-                      className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
-                    />
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone</Label>
+                      <Input
+                        id="phone"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Assunto *</Label>
+                      <Input
+                        id="subject"
+                        value={formData.subject}
+                        onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                        required
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Assunto
-                    </label>
-                    <Input 
-                      placeholder="Assunto da mensagem"
-                      className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Mensagem
-                    </label>
-                    <Textarea 
-                      placeholder="Descreva como podemos ajudá-lo..."
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Mensagem *</Label>
+                    <Textarea
+                      id="message"
                       rows={5}
-                      className="border-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      required
+                      className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
 
                   <Button 
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white py-3 rounded-lg text-lg font-semibold transition-all duration-300"
+                    type="submit" 
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300"
                   >
-                    Enviar Mensagem
+                    {isLoading ? "Enviando..." : "Enviar Mensagem"}
                   </Button>
                 </form>
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
 
-          {/* Contact Information */}
-          <div className="space-y-8">
-            {/* Contact Details */}
-            <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-slate-800">Informações de Contato</h3>
-              {contactInfo.map((info, index) => (
-                <div key={index} className="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl">
-                  <h4 className="text-lg font-semibold text-slate-800 mb-2">{info.title}</h4>
-                  <p className="text-teal-600 font-medium text-lg mb-1">{info.value}</p>
-                  <p className="text-slate-600 text-sm">{info.description}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Social Channels */}
-            <div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-6">Canais Digitais</h3>
-              <div className="bg-white p-6 rounded-xl shadow-lg border">
-                <p className="text-slate-600 mb-4">Siga-nos nas redes sociais:</p>
-                <div className="space-y-3">
-                  {socialChannels.map((channel, index) => (
-                    <div key={index} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-b-0">
-                      <span className="font-medium text-slate-700">{channel.name}</span>
-                      <span className="text-teal-600">{channel.handle}</span>
+          {/* Informações de Contacto */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="space-y-8"
+          >
+            <Card className="hover-elegant">
+              <CardContent className="p-8">
+                <h3 className="text-2xl font-bold text-foreground mb-6">Informações de Contacto</h3>
+                
+                <div className="space-y-6">
+                  <motion.div
+                    whileHover={{ x: 5 }}
+                    className="flex items-start space-x-4"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <MapPin className="w-6 h-6 text-primary" />
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Localização</h4>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Bairro Polana Cimento A<br />
+                        Avenida 24 de Julho Número 797, 1º Andar<br />
+                        Cidade de Maputo - Maputo, CEP: 1092
+                      </p>
+                    </div>
+                  </motion.div>
 
-            {/* Emergency Contact */}
-            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-6 rounded-xl">
-              <h4 className="text-lg font-bold mb-2">Emergência 24h</h4>
-              <p className="text-red-100 mb-3">Para situações de emergência psicológica:</p>
-              <p className="text-xl font-bold">+258 82 759 2980</p>
-            </div>
-          </div>
+                  <motion.div
+                    whileHover={{ x: 5 }}
+                    className="flex items-start space-x-4"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Mail className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Email</h4>
+                      <p className="text-muted-foreground">suporte.oficina.psicologo@proton.me</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ x: 5 }}
+                    className="flex items-start space-x-4"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Phone className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Telefone</h4>
+                      <p className="text-muted-foreground">+258 84 123 4567</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ x: 5 }}
+                    className="flex items-start space-x-4"
+                  >
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground mb-2">Horário de Funcionamento</h4>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Segunda a Sexta: 08:00 - 18:00<br />
+                        Sábado: 08:00 - 13:00<br />
+                        Domingo: Fechado
+                      </p>
+                    </div>
+                  </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Mapa */}
+            <Card className="hover-elegant">
+              <CardContent className="p-0">
+                <div className="aspect-video bg-muted rounded-lg overflow-hidden">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3582.4751!2d32.5859629!3d-25.9732918!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1ee69ba6f067473d%3A0x94e17a17666a1589!2s2HGP%2BMF5%2C%20Maputo!5e0!3m2!1spt!2smz!4v1676543210987!5m2!1spt!2smz"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    title="Localização Tikvah Psychological Center"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </section>
