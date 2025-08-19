@@ -18,8 +18,8 @@ export const Contact = () => {
     },
     {
       title: "Escritório Central",
-      value: "Av. 24 de Julho, 767, B/ Polana Cimento",
-      description: "Sede Principal - Cidade de Maputo"
+      value: "Avenida 24 de Julho N. 797, 1º andar, B/ Polana Cimento 'A'",
+      description: "Sede Principal - Cidade de Maputo, CEP: 1092"
     },
     {
       title: "Escritório Técnico", 
@@ -44,7 +44,7 @@ export const Contact = () => {
   ];
 
   const socialChannels = [
-    { name: "Facebook", handle: "Oficina do Psicólogo Moçambique" },
+    { name: "Facebook", handle: "Tikvah Psychological Center & Multiservice" },
     { name: "Instagram", handle: "@opm_moz" },
     { name: "Twitter", handle: "@opm_moz" },
     { name: "TikTok", handle: "@opm_moz" },

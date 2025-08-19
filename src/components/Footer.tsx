@@ -236,7 +236,7 @@ export const Footer = () => {
                       <div className="space-y-3 text-sm text-white/80">
                         <div>
                           <p className="font-medium text-accent text-xs uppercase tracking-wide">Central</p>
-                          <p className="mt-1">Av. 24 de Julho, 767<br />B/ Polana Cimento, Maputo</p>
+                          <p className="mt-1">Avenida 24 de Julho N. 797, 1º andar<br />Bairro Polana Cimento "A", Cidade de Maputo<br />CEP: 1092</p>
                         </div>
                         <div>
                           <p className="font-medium text-accent text-xs uppercase tracking-wide">Técnico</p>

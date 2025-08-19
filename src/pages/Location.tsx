@@ -30,7 +30,16 @@ const Location = () => {
                 <div className="text-center text-gray-500">
                   <MapPin className="w-12 h-12 mx-auto mb-2" />
                   <p>Mapa Interativo</p>
-                  <p className="text-sm">Google Maps será integrado aqui</p>
+                  <p className="text-sm">
+                    <a 
+                      href="https://www.bing.com/maps?q=tikvah+psycem&FORM=HDRSC6&cp=-25.973089%7E32.5861&lvl=21.2&pi=-3.2&style=x&mo=om.1&dir=154.5" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-teal-600 hover:text-teal-700 underline"
+                    >
+                      Ver no Bing Maps
+                    </a>
+                  </p>
                 </div>
               </div>
               <div className="text-center">
@@ -38,9 +47,10 @@ const Location = () => {
                   Tikvah Psychological Center
                 </h3>
                 <p className="text-slate-600">
-                  Av. Vlademir Lenine n. 4649<br />
-                  Maxaquene "C", Maputo<br />
-                  Moçambique
+                  Avenida 24 de Julho N. 797, 1º andar<br />
+                  Bairro Polana Cimento "A"<br />
+                  Cidade de Maputo - Maputo<br />
+                  CEP: 1092
                 </p>
               </div>
             </CardContent>
@@ -55,10 +65,11 @@ const Location = () => {
                   <h3 className="text-lg font-semibold text-slate-800">Endereço Completo</h3>
                 </div>
                 <p className="text-slate-600 leading-relaxed">
-                  Av. Vlademir Lenine n. 4649<br />
-                  Maxaquene "C"<br />
-                  Maputo, Moçambique<br />
-                  CEP: (código postal se disponível)
+                  Avenida 24 de Julho N. 797, 1º andar<br />
+                  Bairro Polana Cimento "A"<br />
+                  Cidade de Maputo - Maputo<br />
+                  CEP: 1092<br />
+                  Moçambique
                 </p>
               </CardContent>
             </Card>
@@ -71,8 +82,8 @@ const Location = () => {
                 </div>
                 <ul className="text-slate-600 space-y-2">
                   <li>• Estacionamento disponível no local</li>
-                  <li>• Fácil acesso pela Av. Vlademir Lenine</li>
-                  <li>• Próximo a pontos de referência conhecidos</li>
+                  <li>• Fácil acesso pela Avenida 24 de Julho</li>
+                  <li>• Localização central no Bairro Polana Cimento</li>
                   <li>• Área segura e bem iluminada</li>
                 </ul>
               </CardContent>
@@ -121,7 +132,7 @@ const Location = () => {
                     <strong>Telefone:</strong> +258 82 759 2980
                   </p>
                   <p className="text-slate-600">
-                    <strong>Email:</strong> info@tikvah.co.mz
+                    <strong>Email:</strong> suporte.oficina.psicologo@proton.me
                   </p>
                   <a 
                     href="https://wa.me/258827592980" 
@@ -149,7 +160,7 @@ const Location = () => {
             <a href="tel:+258827592980" className="inline-flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
               Ligar Agora
             </a>
-            <a href="mailto:info@tikvah.co.mz" className="inline-flex items-center justify-center px-6 py-3 border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors">
+            <a href="mailto:suporte.oficina.psicologo@proton.me" className="inline-flex items-center justify-center px-6 py-3 border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors">
               Enviar Email
             </a>
           </div>
