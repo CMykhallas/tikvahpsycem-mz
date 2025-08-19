@@ -19,23 +19,45 @@ export const useUserRoles = () => {
   const { data: users, isLoading, error } = useQuery({
     queryKey: ['users-with-roles'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
           id,
           email,
           full_name,
-          created_at,
-          user_roles!inner (role)
+          created_at
         `)
         .order('created_at', { ascending: false })
 
-      if (error) {
-        console.error('Error fetching users with roles:', error)
-        throw error
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError)
+        throw profilesError
       }
 
-      return data as UserWithRole[]
+      // Then get user roles for all users
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role')
+
+      if (rolesError) {
+        console.error('Error fetching user roles:', rolesError)
+        throw rolesError
+      }
+
+      // Combine the data
+      const usersWithRoles = profiles.map(profile => {
+        const roles = userRoles
+          .filter(role => role.user_id === profile.id)
+          .map(role => ({ role: role.role as 'admin' | 'staff' | 'user' }))
+        
+        return {
+          ...profile,
+          user_roles: roles.length > 0 ? roles : [{ role: 'user' as const }]
+        }
+      })
+
+      return usersWithRoles as UserWithRole[]
     },
   })
 
