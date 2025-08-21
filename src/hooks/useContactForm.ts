@@ -5,16 +5,27 @@ import { toast } from "sonner";
 import { validateFormInput, rateLimiter, securityLog, csrfToken } from "@/utils/security";
 import { validateFormDataAdvanced, getClientIP, securityMonitor } from "@/utils/securityEnhancements";
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+interface ContactInsertData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+  status?: string;
+}
+
 export const useContactForm = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const submitContact = async (formData: {
-    name: string;
-    email: string;
-    phone?: string;
-    subject: string;
-    message: string;
-  }) => {
+  const submitContact = async (formData: ContactFormData) => {
     setIsLoading(true);
     
     try {
@@ -41,8 +52,18 @@ export const useContactForm = () => {
         return { success: false };
       }
 
-      // Use sanitized data
-      const sanitizedFormData = validation.sanitizedData;
+      // Use sanitized data and ensure proper typing
+      const sanitizedData = validation.sanitizedData as ContactFormData;
+      
+      // Prepare data for database insertion
+      const insertData: ContactInsertData = {
+        name: sanitizedData.name,
+        email: sanitizedData.email,
+        phone: sanitizedData.phone,
+        subject: sanitizedData.subject,
+        message: sanitizedData.message,
+        status: 'pending'
+      };
 
       // Generate and validate CSRF token
       let token = csrfToken.get();
@@ -51,9 +72,9 @@ export const useContactForm = () => {
       }
 
       // Additional security checks
-      if (sanitizedFormData.message && sanitizedFormData.message.length > 2000) {
+      if (insertData.message && insertData.message.length > 2000) {
         securityMonitor.trackSuspiciousActivity('Oversized message in contact form', {
-          messageLength: sanitizedFormData.message.length,
+          messageLength: insertData.message.length,
           ip: clientIP
         });
         toast.error("Message is too long. Please shorten your message.");
@@ -62,7 +83,7 @@ export const useContactForm = () => {
 
       // Check for spam patterns
       const spamKeywords = ['viagra', 'casino', 'lottery', 'winner', 'congratulations', 'click here'];
-      const messageText = (sanitizedFormData.message + ' ' + sanitizedFormData.subject).toLowerCase();
+      const messageText = (insertData.message + ' ' + insertData.subject).toLowerCase();
       const hasSpamKeywords = spamKeywords.some(keyword => messageText.includes(keyword));
       
       if (hasSpamKeywords) {
@@ -76,13 +97,13 @@ export const useContactForm = () => {
 
       const { error } = await supabase
         .from("contacts")
-        .insert(sanitizedFormData);
+        .insert(insertData);
 
       if (error) throw error;
 
       // Send email via edge function
       await supabase.functions.invoke('send-contact-email', {
-        body: sanitizedFormData
+        body: insertData
       });
 
       // Log successful submission
