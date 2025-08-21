@@ -74,7 +74,7 @@ export const useAppointment = () => {
       toast.error("Erro ao realizar agendamento. Tente novamente.");
       return { success: false };
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 

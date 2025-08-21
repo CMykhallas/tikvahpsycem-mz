@@ -1,5 +1,3 @@
-import { rateLimit } from './security'
-
 // Enhanced security utilities for the application
 export const sanitizeInput = (input: string): string => {
   return input
