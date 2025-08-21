@@ -76,7 +76,7 @@ export const useContactForm = () => {
 
       const { error } = await supabase
         .from("contacts")
-        .insert([sanitizedFormData]);
+        .insert(sanitizedFormData);
 
       if (error) throw error;
 
