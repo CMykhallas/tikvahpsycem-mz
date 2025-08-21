@@ -9,10 +9,10 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
   useEffect(() => {
     // Set security-related meta tags
     const setSecurityHeaders = () => {
-      // Content Security Policy
+      // Content Security Policy - Enhanced for production
       const cspMeta = document.createElement('meta')
       cspMeta.httpEquiv = 'Content-Security-Policy'
-      cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://rccfbawvirzdarzblirj.supabase.co wss://rccfbawvirzdarzblirj.supabase.co; font-src 'self' data:; object-src 'none'; media-src 'self'; frame-src 'none';"
+      cspMeta.content = "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://rccfbawvirzdarzblirj.supabase.co wss://rccfbawvirzdarzblirj.supabase.co; font-src 'self' data:; object-src 'none'; media-src 'self'; frame-src 'self' https://lovable.app https://*.lovable.app;"
       document.head.appendChild(cspMeta)
 
       // X-Content-Type-Options
@@ -21,10 +21,10 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
       noSniffMeta.content = 'nosniff'
       document.head.appendChild(noSniffMeta)
 
-      // X-Frame-Options
+      // X-Frame-Options - Allow iframe for Lovable development
       const frameOptionsMeta = document.createElement('meta')
       frameOptionsMeta.httpEquiv = 'X-Frame-Options'
-      frameOptionsMeta.content = 'DENY'
+      frameOptionsMeta.content = 'SAMEORIGIN'
       document.head.appendChild(frameOptionsMeta)
 
       // Referrer Policy
@@ -32,6 +32,12 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
       referrerMeta.name = 'referrer'
       referrerMeta.content = 'strict-origin-when-cross-origin'
       document.head.appendChild(referrerMeta)
+
+      // Strict Transport Security
+      const stsMeta = document.createElement('meta')
+      stsMeta.httpEquiv = 'Strict-Transport-Security'
+      stsMeta.content = 'max-age=31536000; includeSubDomains'
+      document.head.appendChild(stsMeta)
     }
 
     setSecurityHeaders()
@@ -51,12 +57,28 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => {
       }
     }
 
+    // Add keyboard shortcut protection in production
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (import.meta.env.DEV) return
+      
+      // Prevent F12, Ctrl+Shift+I, Ctrl+U in production
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.key === 'u')
+      ) {
+        e.preventDefault()
+      }
+    }
+
     document.addEventListener('contextmenu', handleContextMenu)
     document.addEventListener('dragstart', handleDragStart)
+    document.addEventListener('keydown', handleKeyDown)
 
     return () => {
       document.removeEventListener('contextmenu', handleContextMenu)
       document.removeEventListener('dragstart', handleDragStart)
+      document.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 

@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
+import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 
@@ -21,28 +21,24 @@ interface UserRole {
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
+  const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [userRole, setUserRole] = useState<'admin' | 'staff' | 'user' | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-        fetchUserRole(session.user.id)
-      }
-      setLoading(false)
-    })
-
-    // Listen for auth changes
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        setSession(session)
         setUser(session?.user ?? null)
+        
+        // Defer additional data fetching to avoid auth callback issues
         if (session?.user) {
-          fetchUserProfile(session.user.id)
-          fetchUserRole(session.user.id)
+          setTimeout(() => {
+            fetchUserProfile(session.user.id)
+            fetchUserRole(session.user.id)
+          }, 0)
         } else {
           setProfile(null)
           setUserRole(null)
@@ -50,6 +46,17 @@ export const useAuth = () => {
         setLoading(false)
       }
     )
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        fetchUserProfile(session.user.id)
+        fetchUserRole(session.user.id)
+      }
+      setLoading(false)
+    })
 
     return () => subscription.unsubscribe()
   }, [])
@@ -122,10 +129,15 @@ export const useAuth = () => {
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
       setLoading(true)
+      
+      // CRITICAL FIX: Add proper email redirect URL
+      const redirectUrl = `${window.location.origin}/`
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: fullName,
           },
@@ -166,10 +178,11 @@ export const useAuth = () => {
 
   const isAdmin = userRole === 'admin'
   const isStaff = userRole === 'staff' || userRole === 'admin'
-  const isAuthenticated = !!user
+  const isAuthenticated = !!user && !!session
 
   return {
     user,
+    session,
     profile,
     userRole,
     loading,

@@ -16,8 +16,8 @@ const securityHeaders = {
   'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; font-src 'self' data:; object-src 'none'; media-src 'self'; frame-src 'none';",
 }
 
-// Rate limiting store (in production, use Redis or similar)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+// Enhanced rate limiting store
+const rateLimitStore = new Map<string, { count: number; resetTime: number; blocked: boolean }>()
 
 function isRateLimited(ip: string, limit: number = 100, windowMs: number = 900000): boolean {
   const now = Date.now()
@@ -25,11 +25,12 @@ function isRateLimited(ip: string, limit: number = 100, windowMs: number = 90000
   const record = rateLimitStore.get(key)
   
   if (!record || now > record.resetTime) {
-    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs })
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs, blocked: false })
     return false
   }
   
   if (record.count >= limit) {
+    record.blocked = true
     return true
   }
   
@@ -37,19 +38,66 @@ function isRateLimited(ip: string, limit: number = 100, windowMs: number = 90000
   return false
 }
 
-function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+async function verifyWebhookSignature(payload: string, signature: string, secret: string): Promise<boolean> {
   try {
+    if (!signature || !secret || !payload) {
+      return false
+    }
+
+    // Remove "sha256=" prefix if present
+    const cleanSignature = signature.replace(/^sha256=/, '')
+    
     const encoder = new TextEncoder()
     const keyData = encoder.encode(secret)
     const messageData = encoder.encode(payload)
     
-    // This is a simplified signature verification
-    // In production, implement proper HMAC-SHA256 verification
-    return signature.length > 0 && secret.length > 0
+    // Import the key for HMAC-SHA256
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    )
+    
+    // Generate the signature
+    const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, messageData)
+    const computedSignature = Array.from(new Uint8Array(signatureBuffer))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+    
+    // Constant-time comparison to prevent timing attacks
+    if (cleanSignature.length !== computedSignature.length) {
+      return false
+    }
+    
+    let result = 0
+    for (let i = 0; i < cleanSignature.length; i++) {
+      result |= cleanSignature.charCodeAt(i) ^ computedSignature.charCodeAt(i)
+    }
+    
+    return result === 0
   } catch (error) {
     console.error('Signature verification error:', error)
     return false
   }
+}
+
+function sanitizeInput(input: any): any {
+  if (typeof input === 'string') {
+    return input
+      .replace(/[<>]/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '')
+      .trim()
+      .slice(0, 500)
+  }
+  return input
+}
+
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email) && email.length <= 254
 }
 
 serve(async (req) => {
@@ -77,10 +125,24 @@ serve(async (req) => {
   let payload: any = null
 
   try {
-    // Rate limiting
+    // Enhanced rate limiting with blocking
     if (isRateLimited(clientIP)) {
       responseStatus = 429
       errorMessage = 'Rate limit exceeded'
+      
+      // Log suspicious activity
+      await supabase.from('webhook_logs').insert({
+        endpoint: url.pathname,
+        method: method,
+        headers: { 'x-forwarded-for': clientIP },
+        payload: null,
+        response_status: 429,
+        processing_time_ms: Date.now() - startTime,
+        error_message: 'Rate limit exceeded',
+        ip_address: clientIP,
+        user_agent: userAgent
+      })
+      
       throw new Error(errorMessage)
     }
 
@@ -91,41 +153,75 @@ serve(async (req) => {
       throw new Error(errorMessage)
     }
 
-    // Parse payload
+    // Parse and validate payload
     const body = await req.text()
-    payload = body ? JSON.parse(body) : {}
-
-    // Verify webhook signature
-    const signature = req.headers.get('x-google-ads-signature') || ''
-    const webhookSecret = Deno.env.get('GOOGLE_ADS_WEBHOOK_SECRET') || ''
-    
-    if (!verifyWebhookSignature(body, signature, webhookSecret)) {
-      responseStatus = 401
-      errorMessage = 'Invalid webhook signature'
+    if (!body) {
+      responseStatus = 400
+      errorMessage = 'Empty payload'
       throw new Error(errorMessage)
     }
 
-    // Process the lead data
+    try {
+      payload = JSON.parse(body)
+    } catch {
+      responseStatus = 400
+      errorMessage = 'Invalid JSON payload'
+      throw new Error(errorMessage)
+    }
+
+    // Enhanced webhook signature verification
+    const signature = req.headers.get('x-google-ads-signature') || ''
+    const webhookSecret = Deno.env.get('GOOGLE_ADS_WEBHOOK_SECRET') || ''
+    
+    const isValidSignature = await verifyWebhookSignature(body, signature, webhookSecret)
+    if (!isValidSignature) {
+      responseStatus = 401
+      errorMessage = 'Invalid webhook signature'
+      
+      // Log potential security breach
+      await supabase.from('webhook_logs').insert({
+        endpoint: url.pathname,
+        method: method,
+        headers: Object.fromEntries(req.headers.entries()),
+        payload: payload,
+        response_status: 401,
+        processing_time_ms: Date.now() - startTime,
+        error_message: 'Invalid signature - potential security breach',
+        ip_address: clientIP,
+        user_agent: userAgent
+      })
+      
+      throw new Error(errorMessage)
+    }
+
+    // Sanitize and validate lead data
     const leadData = {
-      email: payload.email || '',
-      name: payload.name || null,
-      phone: payload.phone || null,
-      campaign_id: payload.campaign_id || null,
-      ad_group_id: payload.ad_group_id || null,
-      keyword: payload.keyword || null,
+      email: sanitizeInput(payload.email || ''),
+      name: sanitizeInput(payload.name) || null,
+      phone: sanitizeInput(payload.phone) || null,
+      campaign_id: sanitizeInput(payload.campaign_id) || null,
+      ad_group_id: sanitizeInput(payload.ad_group_id) || null,
+      keyword: sanitizeInput(payload.keyword) || null,
       source: 'google_ads',
       status: 'new',
       metadata: payload.metadata || {}
     }
 
-    // Validate required fields
-    if (!leadData.email) {
+    // Enhanced validation
+    if (!leadData.email || !validateEmail(leadData.email)) {
       responseStatus = 400
-      errorMessage = 'Email is required'
+      errorMessage = 'Valid email is required'
       throw new Error(errorMessage)
     }
 
-    // Insert lead into database
+    // Additional validation for suspicious patterns
+    if (leadData.name && leadData.name.length > 100) {
+      responseStatus = 400
+      errorMessage = 'Name too long'
+      throw new Error(errorMessage)
+    }
+
+    // Insert lead into database with error handling
     const { error: insertError } = await supabase
       .from('leads')
       .insert(leadData)
@@ -154,13 +250,13 @@ serve(async (req) => {
     
     if (!responseStatus || responseStatus === 200) {
       responseStatus = 500
-      errorMessage = error.message || 'Internal server error'
+      errorMessage = 'Internal server error'
     }
 
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: errorMessage,
+        error: 'Processing failed',
         timestamp: new Date().toISOString()
       }),
       {
@@ -174,7 +270,7 @@ serve(async (req) => {
     )
 
   } finally {
-    // Log webhook request
+    // Enhanced logging with security context
     const processingTime = Date.now() - startTime
     
     try {
