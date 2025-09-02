@@ -67,7 +67,7 @@ const Administration = () => {
       { platform: "Instagram", url: "https://instagram.com/opm_moz", handle: "@opm_moz" },
       { platform: "Twitter", url: "https://twitter.com/opm_moz", handle: "@opm_moz" },
       { platform: "TikTok", url: "https://tiktok.com/@opm_moz", handle: "@opm_moz" },
-      { platform: "LinkedIn", url: "https://linkedin.com/company/tikvah-psycem", handle: "Tikvah Psychological Center & Multiservice" }
+      { platform: "LinkedIn", url: "https://www.linkedin.com/company/tikvah-psycem/?viewAsMember=true", handle: "Tikvah Psychological Center & Multiservice" }
     ]
   };
 

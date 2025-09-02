@@ -26,8 +26,7 @@ const About = () => {
               e consolidando nossa presença em Maputo.
             </p>
             <p className="mb-4">
-              Localizada na Av. Vlademir Lenine n. 4649, Maxaquene "C", Maputo, nossa organização 
-              representa uma evolução natural no campo da psicologia e desenvolvimento humano em Moçambique.
+              Localizada na Cidade de Maputo, onde a nossa organização representa uma evolução natural no campo da psicologia e desenvolvimento humano em Moçambique.
             </p>
           </div>
 

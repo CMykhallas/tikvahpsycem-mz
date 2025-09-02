@@ -104,10 +104,10 @@ const Psicoterapia = () => {
               WhatsApp: +258 82 759 2980
             </a>
             <a 
-              href="mailto:info@tikvah.co.mz"
+              href="mailto:suporte.oficina.psicologo@proton.me"
               className="inline-flex items-center justify-center px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
             >
-              Email: info@tikvah.co.mz
+              Email: suporte.oficina.psicologo@proton.me
             </a>
           </div>
         </div>

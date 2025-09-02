@@ -25,11 +25,11 @@ const Index = () => {
     "logo": "https://tikvahpsycem-mz.lovable.app/logo.png",
     "image": "https://tikvahpsycem-mz.lovable.app/og-image.jpg",
     "telephone": "+258827592980",
-    "email": "info@tikvah.co.mz",
+    "email": "suporte.oficina.psicologo@proton.me",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Av. Vlademir Lenine n. 4649",
-      "addressLocality": "Maxaquene C",
+      "streetAddress": "Cidade de Maputo",
+      "addressLocality": "Maputo",
       "addressRegion": "Maputo",
       "postalCode": "1000",
       "addressCountry": "MZ"

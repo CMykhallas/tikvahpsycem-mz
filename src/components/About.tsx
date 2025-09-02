@@ -39,7 +39,7 @@ export const About = () => {
           </h2>
           <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
             Sucessora da OPM, a Tikvah foi constituída em 2019 com afiliação à Plp-Alleluia, 
-            localizada na Av. Vlademir Lenine n. 4649, Maxaquene "C", Maputo.
+            localizada na Cidade de Maputo, onde a nossa organização representa uma evolução natural no campo da psicologia e desenvolvimento humano em Moçambique.
           </p>
         </div>
 

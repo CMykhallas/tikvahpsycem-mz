@@ -115,6 +115,17 @@ export const Services = () => {
                     Saiba Mais
                   </Button>
                 </Link>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Nossa equipe multidisciplinar inclui Psicólogos Clínicos, Organizacionais, Educacionais, Psicanalistas, Terapeutas e Consultores especializados em diversas áreas como Agropecuária, TI e Gestão Financeira.{" "}
+                  <a 
+                    href="https://lovable.dev/projects/9e6ce086-a97f-4df2-ba5d-6b75229cefea" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    Saiba mais
+                  </a>
+                </p>
               </CardContent>
             </Card>
           ))}
