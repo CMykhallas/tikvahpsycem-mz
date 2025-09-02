@@ -238,10 +238,10 @@ export const Footer = () => {
                           <p className="font-medium text-accent text-xs uppercase tracking-wide">Central</p>
                           <p className="mt-1">Avenida 24 de Julho N. 797, 1º andar<br />Bairro Polana Cimento "A", Cidade de Maputo<br />CEP: 1092</p>
                         </div>
-                        <div>
-                          <p className="font-medium text-accent text-xs uppercase tracking-wide">Técnico</p>
-                          <p className="mt-1">Av. Vlademir Lenine<br />B/ Maxaquene "C", Maputo</p>
-                        </div>
+                         <div>
+                           <p className="font-medium text-accent text-xs uppercase tracking-wide">Técnico</p>
+                           <p className="mt-1">Cidade de Maputo<br />Atendimento Especializado</p>
+                         </div>
                       </div>
                     </div>
                   </div>

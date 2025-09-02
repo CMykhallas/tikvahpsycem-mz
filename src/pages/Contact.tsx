@@ -165,8 +165,7 @@ const Contact = () => {
                     <h3 className="text-lg font-semibold text-foreground">Escritório Técnico</h3>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <p className="text-muted-foreground">Av. Vlademir Lenine n. 4650</p>
-                    <p className="text-muted-foreground">B/ Maxaquene 'C', Maputo</p>
+                    <p className="text-muted-foreground">Cidade de Maputo</p>
                     <p className="text-xs text-muted-foreground">Atendimento Especializado</p>
                   </div>
                 </CardContent>

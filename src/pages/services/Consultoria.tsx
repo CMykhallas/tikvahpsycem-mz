@@ -12,29 +12,25 @@ const Consultoria = () => {
       icon: Building,
       title: "Consultoria Organizacional",
       description: "Desenvolvimento e otimização de processos organizacionais para maior eficiência e produtividade.",
-      duration: "120 minutos",
-      price: "5.000,00 MT"
+      duration: "120 minutos"
     },
     {
       icon: Users,
       title: "Gestão de Recursos Humanos",
       description: "Estratégias para recrutamento, desenvolvimento e retenção de talentos na sua organização.",
-      duration: "90 minutos",
-      price: "4.500,00 MT"
+      duration: "90 minutos"
     },
     {
       icon: TrendingUp,
       title: "Coaching Executivo",
       description: "Desenvolvimento de lideranças para maximizar o potencial e performance executiva.",
-      duration: "90 minutos",
-      price: "4.000,00 MT"
+      duration: "90 minutos"
     },
     {
       icon: Target,
       title: "Assessment Psicológico Organizacional",
       description: "Avaliação psicológica para seleção, desenvolvimento e posicionamento de colaboradores.",
-      duration: "180 minutos",
-      price: "6.000,00 MT"
+      duration: "180 minutos"
     }
   ];
 
@@ -65,14 +61,10 @@ const Consultoria = () => {
                   <h3 className="text-2xl font-bold text-slate-800 mb-4">{service.title}</h3>
                   <p className="text-slate-600 mb-6 leading-relaxed">{service.description}</p>
                   
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="mb-6">
                     <div>
                       <p className="text-sm text-slate-500">Duração</p>
                       <p className="font-semibold text-slate-700">{service.duration}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-500">Investimento</p>
-                      <p className="font-bold text-blue-600 text-lg">{service.price}</p>
                     </div>
                   </div>
                   

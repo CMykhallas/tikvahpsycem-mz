@@ -12,29 +12,25 @@ const Psicoterapia = () => {
       icon: Heart,
       title: "Psicoterapia Individual",
       description: "Atendimento personalizado para questões pessoais, ansiedade, depressão e desenvolvimento pessoal.",
-      duration: "60 minutos",
-      price: "2.500,00 MT"
+      duration: "60 minutos"
     },
     {
       icon: Users,
       title: "Terapia de Casal",
       description: "Apoio especializado para casais que buscam melhorar sua comunicação e relacionamento.",
-      duration: "90 minutos", 
-      price: "3.000,00 MT"
+      duration: "90 minutos"
     },
     {
       icon: Home,
       title: "Terapia Familiar",
       description: "Intervenção sistêmica para famílias que enfrentam conflitos e desafios relacionais.",
-      duration: "90 minutos",
-      price: "3.500,00 MT"
+      duration: "90 minutos"
     },
     {
       icon: Brain,
       title: "Avaliação Psicológica",
       description: "Avaliação completa para diagnóstico e orientação terapêutica personalizada.",
-      duration: "120 minutos",
-      price: "4.000,00 MT"
+      duration: "120 minutos"
     }
   ];
 
@@ -65,14 +61,10 @@ const Psicoterapia = () => {
                   <h3 className="text-2xl font-bold text-slate-800 mb-4">{service.title}</h3>
                   <p className="text-slate-600 mb-6 leading-relaxed">{service.description}</p>
                   
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="mb-6">
                     <div>
                       <p className="text-sm text-slate-500">Duração</p>
                       <p className="font-semibold text-slate-700">{service.duration}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-500">Preço</p>
-                      <p className="font-bold text-teal-600 text-lg">{service.price}</p>
                     </div>
                   </div>
                   

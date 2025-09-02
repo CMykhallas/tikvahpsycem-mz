@@ -15,7 +15,6 @@ const Workshops = () => {
       description: "Técnicas práticas de mindfulness para redução do stress e melhoria da qualidade de vida.",
       duration: "180 minutos",
       participants: "8-12",
-      price: "1.500,00 MT",
       topics: ["Meditação", "Respiração", "Atenção Plena", "Relaxamento"]
     },
     {
@@ -24,7 +23,6 @@ const Workshops = () => {
       description: "Estratégias eficazes para identificar, compreender e gerir o stress no ambiente pessoal e profissional.",
       duration: "240 minutos",
       participants: "6-10",
-      price: "2.000,00 MT",
       topics: ["Identificação do Stress", "Técnicas de Relaxamento", "Time Management", "Autocuidado"]
     },
     {
@@ -33,7 +31,6 @@ const Workshops = () => {
       description: "Desenvolva competências para colaboração eficaz e sinergia em equipas de trabalho.",
       duration: "300 minutos",
       participants: "8-15",
-      price: "2.500,00 MT",
       topics: ["Comunicação", "Confiança", "Roles & Responsabilidades", "Dinâmicas de Grupo"]
     },
     {
@@ -42,7 +39,6 @@ const Workshops = () => {
       description: "Aprenda técnicas de mediação e resolução construtiva de conflitos interpessoais.",
       duration: "240 minutos",
       participants: "6-12",
-      price: "2.200,00 MT",
       topics: ["Mediação", "Negociação", "Comunicação Assertiva", "Gestão Emocional"]
     }
   ];
@@ -91,14 +87,10 @@ const Workshops = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="mb-6">
                     <div>
                       <p className="text-sm text-slate-500">Duração</p>
                       <p className="font-semibold text-slate-700">{workshop.duration}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-500">Investimento</p>
-                      <p className="font-bold text-emerald-600 text-lg">{workshop.price}</p>
                     </div>
                   </div>
                   

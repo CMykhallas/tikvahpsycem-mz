@@ -15,7 +15,6 @@ const Cursos = () => {
       description: "Desenvolva suas competências emocionais para melhor relacionamento pessoal e profissional.",
       duration: "240 minutos",
       level: "Iniciante",
-      price: "4.000,00 MT",
       modules: ["Autoconhecimento", "Autorregulação", "Empatia", "Habilidades Sociais"]
     },
     {
@@ -23,8 +22,7 @@ const Cursos = () => {
       title: "Liderança e Gestão",
       description: "Aprenda técnicas avançadas de liderança e gestão de equipes para maximizar resultados.",
       duration: "360 minutos",
-      level: "Intermediário", 
-      price: "5.500,00 MT",
+      level: "Intermediário",
       modules: ["Estilos de Liderança", "Motivação", "Delegação", "Gestão de Conflitos"]
     },
     {
@@ -33,7 +31,6 @@ const Cursos = () => {
       description: "Melhore suas habilidades de comunicação para relacionamentos mais produtivos.",
       duration: "180 minutos",
       level: "Iniciante",
-      price: "3.000,00 MT",
       modules: ["Comunicação Verbal", "Linguagem Corporal", "Escuta Ativa", "Feedback"]
     },
     {
@@ -42,7 +39,6 @@ const Cursos = () => {
       description: "Programa completo para autodesenvolvimento e realização de objetivos pessoais.",
       duration: "300 minutos",
       level: "Todos os níveis",
-      price: "4.500,00 MT",
       modules: ["Definição de Metas", "Produtividade", "Mindset", "Planejamento"]
     }
   ];
@@ -100,14 +96,10 @@ const Cursos = () => {
                     </div>
                   </div>
                   
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="mb-6">
                     <div>
                       <p className="text-sm text-slate-500">Duração Total</p>
                       <p className="font-semibold text-slate-700">{course.duration}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm text-slate-500">Investimento</p>
-                      <p className="font-bold text-purple-600 text-lg">{course.price}</p>
                     </div>
                   </div>
                   
