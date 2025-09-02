@@ -42,7 +42,8 @@ export const performSecurityCheck = (input: string, context: any = {}) => {
       ...(threatAnalysis.threatLevel === 'critical' ? ['Critical security threat detected'] : [])
     ],
     riskScore: threatAnalysis.riskScore,
-    recommendations: threatAnalysis.recommendations
+    recommendations: threatAnalysis.recommendations,
+    threatResponse: undefined as any
   };
   
   // Log security events
