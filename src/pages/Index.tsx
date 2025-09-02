@@ -1,5 +1,5 @@
 
-import { VideoHero } from "@/components/VideoHero";
+import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { Services } from "@/components/Services";
 import { Contact } from "@/components/Contact";
@@ -107,7 +107,7 @@ const Index = () => {
             <h1 id="hero-heading" className="sr-only">
               Tikvah Psychological Center - Centro de Psicologia e Desenvolvimento Humano em Maputo
             </h1>
-            <VideoHero />
+            <Hero />
           </section>
 
           <section aria-labelledby="about-heading">
