@@ -28,6 +28,7 @@ import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
+import SecurityAudit from "./pages/SecurityAudit";
 
 // Services pages
 import Psicoterapia from "./pages/services/Psicoterapia";
@@ -87,9 +88,10 @@ function App() {
               {/* Auth Route */}
               <Route path="/auth" element={<Auth />} />
               
-              {/* Admin Routes */}
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+               {/* Admin Routes */}
+               <Route path="/admin" element={<AdminLogin />} />
+               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+               <Route path="/admin/security-audit" element={<SecurityAudit />} />
               
               {/* 404 Route */}
               <Route path="*" element={<NotFound />} />
