@@ -46,7 +46,8 @@ export const Navbar = () => {
         { name: "Feedback", href: "/feedback" },
         { name: "Localização", href: "/location" }
       ]
-    }
+    },
+    { name: "Entrar", href: "/auth" }
   ];
 
   return (

@@ -55,11 +55,11 @@ export const Hero = () => {
               </hgroup>
 
               {/* Call to action buttons */}
-              <nav className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center" aria-label="Ações principais">
+              <nav className="flex flex-wrap justify-center lg:justify-start items-center gap-3" aria-label="Ações principais">
                 <Link to="/appointment" aria-describedby="cta-appointment">
                   <Button 
                     size="lg" 
-                    className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white px-6 py-3 rounded-full text-base font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
                     id="cta-appointment"
                   >
                     Agendar Consulta
@@ -69,10 +69,20 @@ export const Hero = () => {
                   <Button 
                     variant="outline" 
                     size="lg"
-                    className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300"
+                    className="border-2 border-slate-300 text-slate-700 hover:bg-slate-50 px-6 py-3 rounded-full text-base font-semibold transition-all duration-300"
                     id="cta-services"
                   >
-                    Conheça Nossos Serviços
+                    Nossos Serviços
+                  </Button>
+                </Link>
+                <Link to="/auth" aria-describedby="cta-auth">
+                  <Button 
+                    variant="ghost" 
+                    size="lg"
+                    className="text-slate-600 hover:text-teal-700 hover:bg-white/50 px-4 py-2 rounded-full text-base font-medium transition-all duration-300"
+                    id="cta-auth"
+                  >
+                    Entrar
                   </Button>
                 </Link>
               </nav>

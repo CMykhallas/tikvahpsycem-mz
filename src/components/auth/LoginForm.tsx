@@ -36,10 +36,10 @@ export const LoginForm = () => {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold">Entrar</CardTitle>
         <CardDescription>
-          Enter your credentials to access the admin dashboard
+          Acesse sua conta com suas credenciais
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -80,7 +80,7 @@ export const LoginForm = () => {
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
         </Form>

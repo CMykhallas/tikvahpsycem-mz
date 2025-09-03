@@ -27,6 +27,7 @@ import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
+import Auth from "./pages/Auth";
 
 // Services pages
 import Psicoterapia from "./pages/services/Psicoterapia";
@@ -82,6 +83,9 @@ function App() {
               <Route path="/blog/trauma-cultural-resiliencia-pos-colonial" element={<TraumaCulturalResiliencia />} />
               <Route path="/blog/act-terapia-contextos-africanos" element={<ACTTerapiaContextos />} />
               <Route path="/blog/psicologia-organizacional-transformacao-digital" element={<PsicologiaOrganizacional />} />
+              
+              {/* Auth Route */}
+              <Route path="/auth" element={<Auth />} />
               
               {/* Admin Routes */}
               <Route path="/admin" element={<AdminLogin />} />
