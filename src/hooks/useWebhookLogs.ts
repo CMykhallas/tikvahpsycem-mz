@@ -20,18 +20,9 @@ export const useWebhookLogs = (limit: number = 100) => {
   const { data: logs, isLoading, error } = useQuery({
     queryKey: ['webhook-logs', limit],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('webhook_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(limit)
-
-      if (error) {
-        console.error('Error fetching webhook logs:', error)
-        throw error
-      }
-
-      return data as WebhookLog[]
+      // Since webhook_logs table doesn't exist, return empty array
+      // This can be implemented when the table is created
+      return [] as WebhookLog[]
     },
   })
 
@@ -48,7 +39,7 @@ export const useWebhookLogs = (limit: number = 100) => {
       successfulRequests,
       errorRequests,
       successRate: totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 0,
-      averageProcessingTime: Math.round(averageProcessingTime)
+      averageProcessingTime: Math.round(averageProcessingTime) || 0
     }
   }
 

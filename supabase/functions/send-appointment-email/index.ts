@@ -1,5 +1,8 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -108,23 +111,84 @@ serve(async (req) => {
       service_type: sanitizedData.service_type 
     });
 
-    const emailContent = `
-      Novo agendamento:
-      
-      Cliente: ${sanitizedData.client_name}
-      Email: ${sanitizedData.email}
-      Telefone: ${sanitizedData.phone}
-      Serviço: ${sanitizedData.service_type}
-      Data Preferida: ${new Date(sanitizedData.preferred_date).toLocaleString('pt-PT')}
-      
-      Observações:
-      ${sanitizedData.message || 'Nenhuma observação'}
-    `;
+    // Send notification email to admin
+    const adminEmailResponse = await resend.emails.send({
+      from: 'Sistema de Agendamentos <onboarding@resend.dev>',
+      to: ['admin@yoursite.com'], // Replace with your admin email
+      subject: `Novo agendamento solicitado - ${sanitizedData.service_type}`,
+      html: `
+        <h2>Novo agendamento solicitado</h2>
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Cliente:</strong> ${sanitizedData.client_name}</p>
+          <p><strong>Email:</strong> ${sanitizedData.email}</p>
+          <p><strong>Telefone:</strong> ${sanitizedData.phone}</p>
+          <p><strong>Serviço:</strong> ${sanitizedData.service_type}</p>
+          <p><strong>Data Preferida:</strong> ${new Date(sanitizedData.preferred_date).toLocaleString('pt-PT')}</p>
+        </div>
+        
+        ${sanitizedData.message ? `
+          <h3>Observações:</h3>
+          <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+            ${sanitizedData.message.replace(/\n/g, '<br>')}
+          </div>
+        ` : ''}
+        
+        <p style="color: #666; font-size: 12px; margin-top: 20px;">
+          Acesse o painel administrativo para confirmar ou reagendar este atendimento.
+        </p>
+      `,
+    });
 
-    console.log('Email content prepared successfully');
+    // Send confirmation email to client
+    const clientEmailResponse = await resend.emails.send({
+      from: 'Atendimento <onboarding@resend.dev>',
+      to: [sanitizedData.email],
+      subject: 'Agendamento recebido - Confirmação pendente',
+      html: `
+        <h2>Olá, ${sanitizedData.client_name}!</h2>
+        <p>Recebemos sua solicitação de agendamento e entraremos em contato em breve para confirmar.</p>
+        
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3>Detalhes do seu agendamento:</h3>
+          <p><strong>Serviço:</strong> ${sanitizedData.service_type}</p>
+          <p><strong>Data Preferida:</strong> ${new Date(sanitizedData.preferred_date).toLocaleString('pt-PT')}</p>
+          <p><strong>Telefone de contato:</strong> ${sanitizedData.phone}</p>
+        </div>
+        
+        ${sanitizedData.message ? `
+          <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px; margin: 20px 0;">
+            <h4>Suas observações:</h4>
+            <p>${sanitizedData.message.replace(/\n/g, '<br>')}</p>
+          </div>
+        ` : ''}
+        
+        <p>Nossa equipe analisará sua solicitação e entrará em contato em até 24 horas para confirmar o horário disponível mais próximo da sua preferência.</p>
+        
+        <p><strong>Próximos passos:</strong></p>
+        <ul>
+          <li>Aguarde nosso contato por email ou telefone</li>
+          <li>Confirme o horário proposto</li>
+          <li>Receba as informações de localização e preparação</li>
+        </ul>
+        
+        <p style="color: #666; font-size: 12px; margin-top: 20px;">
+          Esta é uma mensagem automática. Se tiver dúvidas, responda a este email.
+        </p>
+      `,
+    });
+
+    console.log('Emails de agendamento enviados:', { 
+      adminEmailId: adminEmailResponse.data?.id, 
+      clientEmailId: clientEmailResponse.data?.id 
+    });
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Email de confirmação enviado' }),
+      JSON.stringify({ 
+        success: true, 
+        message: 'Email de confirmação enviado',
+        adminEmailId: adminEmailResponse.data?.id,
+        clientEmailId: clientEmailResponse.data?.id
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
@@ -133,7 +197,6 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-appointment-email:', error.message);
     
-    // Don't expose internal error details
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       {

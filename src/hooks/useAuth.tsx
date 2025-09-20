@@ -95,7 +95,7 @@ export const useAuth = () => {
         return
       }
 
-      setUserRole(data?.role || 'user')
+      setUserRole((data?.role as 'admin' | 'staff' | 'user') || 'user')
     } catch (error) {
       console.error('Error fetching user role:', error)
       setUserRole('user')
