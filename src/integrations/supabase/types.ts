@@ -29,6 +29,42 @@ export type Database = {
         }
         Relationships: []
       }
+      relatorio_temp: {
+        Row: {
+          data_criacao: string | null
+          metricas: Json | null
+          registro_id: number
+        }
+        Insert: {
+          data_criacao?: string | null
+          metricas?: Json | null
+          registro_id?: number
+        }
+        Update: {
+          data_criacao?: string | null
+          metricas?: Json | null
+          registro_id?: number
+        }
+        Relationships: []
+      }
+      usuarios: {
+        Row: {
+          email: string | null
+          id: number
+          nome: string
+        }
+        Insert: {
+          email?: string | null
+          id?: number
+          nome: string
+        }
+        Update: {
+          email?: string | null
+          id?: number
+          nome?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
