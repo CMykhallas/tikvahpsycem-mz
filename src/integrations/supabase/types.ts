@@ -14,6 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          client_ip: string | null
+          client_name: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          phone: string | null
+          preferred_date: string
+          service_type: string
+          status: string
+        }
+        Insert: {
+          client_ip?: string | null
+          client_name: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          preferred_date: string
+          service_type: string
+          status?: string
+        }
+        Update: {
+          client_ip?: string | null
+          client_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          phone?: string | null
+          preferred_date?: string
+          service_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      blog_images: {
+        Row: {
+          alt_text: string
+          blog_slug: string
+          created_at: string
+          id: string
+          image_url: string
+          position: number
+        }
+        Insert: {
+          alt_text: string
+          blog_slug: string
+          created_at?: string
+          id?: string
+          image_url: string
+          position?: number
+        }
+        Update: {
+          alt_text?: string
+          blog_slug?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          position?: number
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          client_ip: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          client_ip?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          client_ip?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          ad_group_id: string | null
+          campaign_id: string | null
+          created_at: string
+          email: string
+          id: string
+          keyword: string | null
+          metadata: Json
+          name: string | null
+          phone: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          ad_group_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          keyword?: string | null
+          metadata?: Json
+          name?: string | null
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          ad_group_id?: string | null
+          campaign_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          keyword?: string | null
+          metadata?: Json
+          name?: string | null
+          phone?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           id: number
@@ -26,6 +173,33 @@ export type Database = {
         Update: {
           id?: never
           title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -44,6 +218,57 @@ export type Database = {
           data_criacao?: string | null
           metricas?: Json | null
           registro_id?: number
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -70,7 +295,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: { _role: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
