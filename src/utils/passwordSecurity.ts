@@ -1,4 +1,14 @@
-import * as sha1 from 'js-sha1'
+/**
+ * Simple SHA-1 implementation for password checking
+ * Using native crypto API for better compatibility
+ */
+async function sha1Hash(message: string): Promise<string> {
+  const msgBuffer = new TextEncoder().encode(message)
+  const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex.toUpperCase()
+}
 
 /**
  * Verifica se uma senha foi comprometida em violações de dados usando a API HaveIBeenPwned
@@ -15,7 +25,7 @@ export async function checkPasswordSecurity(password: string): Promise<{ isSecur
 
   try {
     // Gera hash SHA-1 da senha
-    const passwordHash = (sha1 as any)(password).toUpperCase()
+    const passwordHash = await sha1Hash(password)
     const firstFiveChars = passwordHash.substring(0, 5)
     const remainingHash = passwordHash.substring(5)
 

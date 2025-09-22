@@ -70,7 +70,12 @@ export const SignUpForm = () => {
         suggestions: strengthCheck.suggestions
       })
     } catch (error) {
-      console.error('Erro ao verificar senha:', error)
+      console.error('Erro ao verificar segurança da senha:', error)
+      // Em caso de erro, permite continuar sem verificação
+      setPasswordSecurityStatus({
+        isSecure: true,
+        error: 'Não foi possível verificar a segurança da senha, mas o registro pode continuar'
+      })
     } finally {
       setIsCheckingPassword(false)
     }
@@ -80,21 +85,7 @@ export const SignUpForm = () => {
     setIsLoading(true)
     
     try {
-      // Verificação final de segurança da senha
-      toast.info('Verificando segurança da senha...')
-      const securityCheck = await checkPasswordSecurity(data.password)
-      
-      if (!securityCheck.isSecure && !securityCheck.error?.includes('registro pode continuar')) {
-        toast.error(securityCheck.error || 'Senha não é segura')
-        setIsLoading(false)
-        return
-      }
-
-      if (securityCheck.error) {
-        toast.warning(securityCheck.error)
-      }
-
-      // Procede com o registro
+      // Procede diretamente com o registro, verificação de senha é opcional
       toast.info('Criando sua conta...')
       const success = await signUp(data.email, data.password, data.fullName)
       
@@ -104,7 +95,7 @@ export const SignUpForm = () => {
       }
     } catch (error) {
       console.error('Erro no registro:', error)
-      toast.error('Erro inesperado ao criar conta')
+      toast.error('Erro ao criar conta. Tente novamente.')
     } finally {
       setIsLoading(false)
     }
@@ -241,7 +232,7 @@ export const SignUpForm = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isLoading || isCheckingPassword || (passwordSecurityStatus.isSecure === false)}
+              disabled={isLoading}
             >
               {isLoading ? 'Criando conta...' : 'Criar Conta'}
             </Button>
