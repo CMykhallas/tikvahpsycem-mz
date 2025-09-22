@@ -21,8 +21,8 @@ serve(async (req) => {
 
     // Send notification email to admin
     const adminEmailResponse = await resend.emails.send({
-      from: 'Sistema <onboarding@resend.dev>',
-      to: ['admin@yoursite.com'], // Replace with your admin email
+      from: 'Tikvah Psycem <onboarding@resend.dev>',
+      to: ['admin@tikvahpsycem.com'], // Admin email
       subject: `Nova mensagem de contato: ${subject}`,
       html: `
         <h2>Nova mensagem de contato recebida</h2>
@@ -44,7 +44,7 @@ serve(async (req) => {
 
     // Send confirmation email to user
     const userEmailResponse = await resend.emails.send({
-      from: 'Atendimento <onboarding@resend.dev>',
+      from: 'Tikvah Psycem <onboarding@resend.dev>',
       to: [email],
       subject: 'Mensagem recebida - Obrigado pelo contato!',
       html: `
