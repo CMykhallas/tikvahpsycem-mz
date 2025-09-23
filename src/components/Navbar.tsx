@@ -56,12 +56,8 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 rounded-lg border border-teal-200/30 shadow-sm">
-              <img 
-                src="/tikvah-logo.jpg" 
-                alt="Tikvah Psychological Center & Multiservice Logo" 
-                className="w-8 h-8 object-cover rounded-md"
-              />
+            <div className="w-10 h-10 bg-gradient-to-r from-teal-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-lg">T</span>
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold text-slate-800">Tikvah</span>
