@@ -56,11 +56,11 @@ export const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-12 h-12 flex items-center justify-center">
+            <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-teal-50 to-blue-50 rounded-lg border border-teal-200/30 shadow-sm">
               <img 
                 src="/tikvah-logo.jpg" 
                 alt="Tikvah Psychological Center & Multiservice Logo" 
-                className="w-full h-full object-contain rounded-lg"
+                className="w-8 h-8 object-cover rounded-md"
               />
             </div>
             <div className="flex flex-col">
