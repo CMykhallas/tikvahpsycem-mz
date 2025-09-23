@@ -22,7 +22,7 @@ const Index = () => {
     "name": "Tikvah Psychological Center & Multiservice",
     "description": "Centro psicológico especializado em desenvolvimento humano integral em Maputo, Moçambique",
     "url": "https://tikvahpsycem-mz.lovable.app",
-    "logo": "https://tikvahpsycem-mz.lovable.app/logo.png",
+    "logo": "/tikvah-logo.jpg",
     "image": "https://tikvahpsycem-mz.lovable.app/og-image.jpg",
     "telephone": "+258827592980",
     "email": "suporte.oficina.psicologo@proton.me",
