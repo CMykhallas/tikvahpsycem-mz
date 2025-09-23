@@ -33,11 +33,6 @@ export const Hero = () => {
           {/* Content Section */}
           <header className="text-center lg:text-left">
             <div className="space-y-8 animate-fade-in">
-              {/* Professional Badge */}
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-teal-200/50 shadow-lg">
-                <Award className="w-4 h-4 text-teal-600 mr-2" />
-                <span className="text-sm font-semibold text-slate-700">Centro Psicológico Certificado - Maputo</span>
-              </div>
 
               {/* Main headline com H1 semântico */}
               <hgroup className="space-y-4">
