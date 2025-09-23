@@ -198,8 +198,8 @@ export const Footer = () => {
                         <a href="tel:+258828926020" className="block hover:text-accent transition-colors">
                           +258 82 892 6020 <span className="text-xs">(Operacional)</span>
                         </a>
-                        <a href="tel:+2587785043" className="block hover:text-accent transition-colors">
-                          +258 778 5043 <span className="text-xs">(Apoio)</span>
+                        <a href="tel:+258827785043" className="block hover:text-accent transition-colors">
+                          +258 82 778 5043 <span className="text-xs">(Apoio)</span>
                         </a>
                       </div>
                     </div>
