@@ -256,8 +256,8 @@ export const Footer = () => {
               <div className="flex flex-wrap gap-4">
                 <Button 
                   asChild 
-                  variant="outline" 
-                  className="border-white/20 text-white hover:bg-white hover:text-primary"
+                  variant="secondary" 
+                  className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary backdrop-blur-sm"
                 >
                   <Link to="/appointment">Agendar Consulta</Link>
                 </Button>
