@@ -10,8 +10,8 @@ import { z } from 'zod'
 import { useAuth } from '@/hooks/useAuth'
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Por favor, insira um endereço de email válido').max(255, 'Email muito longo'),
+  password: z.string().min(1, 'Senha é obrigatória').max(100, 'Senha muito longa'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
@@ -30,8 +30,13 @@ export const LoginForm = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
-    await signIn(data.email, data.password)
-    setIsLoading(false)
+    try {
+      await signIn(data.email, data.password)
+    } catch (error) {
+      console.error('Erro no login:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -52,9 +57,9 @@ export const LoginForm = () => {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
+                   <Input
                       type="email"
-                      placeholder="your@email.com"
+                      placeholder="seu@email.com"
                       {...field}
                     />
                   </FormControl>
@@ -67,11 +72,11 @@ export const LoginForm = () => {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>Senha</FormLabel>
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="Enter your password"
+                      placeholder="Digite sua senha"
                       {...field}
                     />
                   </FormControl>

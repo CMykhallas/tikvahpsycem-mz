@@ -111,15 +111,15 @@ export const useAuth = () => {
       })
 
       if (error) {
-        toast.error(error.message)
+        toast.error('Email ou senha inválidos. Tente novamente.')
         return false
       }
 
-      toast.success('Signed in successfully')
+      toast.success('Login realizado com sucesso!')
       return true
     } catch (error) {
-      console.error('Sign in error:', error)
-      toast.error('An error occurred during sign in')
+      console.error('Erro no login:', error)
+      toast.error('Ocorreu um erro durante o login. Tente novamente.')
       return false
     } finally {
       setLoading(false)
@@ -145,15 +145,23 @@ export const useAuth = () => {
       })
 
       if (error) {
-        toast.error(error.message)
+        if (error.message.includes('User already registered')) {
+          toast.error('Este email já está registrado. Tente fazer login.')
+        } else if (error.message.includes('Invalid email')) {
+          toast.error('Email inválido. Verifique e tente novamente.')
+        } else if (error.message.includes('Password')) {
+          toast.error('A senha deve ter pelo menos 6 caracteres.')
+        } else {
+          toast.error('Erro ao criar conta. Tente novamente.')
+        }
         return false
       }
 
-      toast.success('Account created! Please check your email to verify your account.')
+      toast.success('Conta criada com sucesso! Verifique seu email para confirmar.')
       return true
     } catch (error) {
-      console.error('Sign up error:', error)
-      toast.error('An error occurred during sign up')
+      console.error('Erro no cadastro:', error)
+      toast.error('Ocorreu um erro durante o cadastro. Tente novamente.')
       return false
     } finally {
       setLoading(false)
@@ -164,14 +172,14 @@ export const useAuth = () => {
     try {
       const { error } = await supabase.auth.signOut()
       if (error) {
-        toast.error(error.message)
+        toast.error('Erro ao sair. Tente novamente.')
         return false
       }
-      toast.success('Signed out successfully')
+      toast.success('Logout realizado com sucesso!')
       return true
     } catch (error) {
-      console.error('Sign out error:', error)
-      toast.error('An error occurred during sign out')
+      console.error('Erro no logout:', error)
+      toast.error('Ocorreu um erro ao sair. Tente novamente.')
       return false
     }
   }
