@@ -114,7 +114,7 @@ serve(async (req) => {
     // Send notification email to admin
     const adminEmailResponse = await resend.emails.send({
       from: 'Sistema de Agendamentos <onboarding@resend.dev>',
-      to: ['admin@yoursite.com'], // Replace with your admin email
+      to: ['suporte.oficina.psicologo@proton.me'], // Admin email
       subject: `Novo agendamento solicitado - ${sanitizedData.service_type}`,
       html: `
         <h2>Novo agendamento solicitado</h2>
