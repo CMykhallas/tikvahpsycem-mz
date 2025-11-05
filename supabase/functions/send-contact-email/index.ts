@@ -9,13 +9,87 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Input validation and sanitization
+const MAX_PAYLOAD_SIZE = 10240; // 10KB
+
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function sanitizeString(str: string, maxLength: number): string {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .trim()
+    .slice(0, maxLength)
+    .replace(/[<>]/g, '') // Remove potential HTML injection characters
+    .replace(/[\r\n]+/g, '\n'); // Normalize line breaks
+}
+
+function validateContactData(data: any): { valid: boolean; error?: string } {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid request payload' };
+  }
+
+  const { name, email, subject, message } = data;
+
+  if (!name || !email || !subject || !message) {
+    return { valid: false, error: 'Missing required fields' };
+  }
+
+  if (!validateEmail(email)) {
+    return { valid: false, error: 'Invalid email address' };
+  }
+
+  if (name.length > 100 || subject.length > 200 || message.length > 2000) {
+    return { valid: false, error: 'Input exceeds maximum length' };
+  }
+
+  return { valid: true };
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { name, email, phone, subject, message } = await req.json();
+    // Validate content type
+    const contentType = req.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return new Response(
+        JSON.stringify({ error: 'Content-Type must be application/json' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    // Check payload size
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
+      return new Response(
+        JSON.stringify({ error: 'Payload too large' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 413 }
+      );
+    }
+
+    const rawData = await req.json();
+
+    // Validate input data
+    const validation = validateContactData(rawData);
+    if (!validation.valid) {
+      console.error('Validation failed:', validation.error);
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
+    }
+
+    // Sanitize all inputs
+    const name = sanitizeString(rawData.name, 100);
+    const email = rawData.email.trim().toLowerCase();
+    const phone = rawData.phone ? sanitizeString(rawData.phone, 20) : null;
+    const subject = sanitizeString(rawData.subject, 200);
+    const message = sanitizeString(rawData.message, 2000);
 
     console.log('Enviando email de contato:', { name, email, subject });
 

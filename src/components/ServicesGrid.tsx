@@ -37,7 +37,10 @@ export const ServicesGrid: React.FC = () => {
           transition={{ duration: 0.5, delay: index * 0.1 }}
         >
           <ServiceCard 
-            {...service} 
+            id={service.id}
+            name={service.title}
+            description={service.description}
+            price={1000}
             currency="MZN"
             category="Psicologia"
           />
