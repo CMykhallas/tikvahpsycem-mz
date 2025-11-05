@@ -87,7 +87,7 @@ serve(async (req) => {
     // Sanitize all inputs
     const name = sanitizeString(rawData.name, 100);
     const email = rawData.email.trim().toLowerCase();
-    const phone = rawData.phone ? sanitizeString(rawData.phone, 20) : null;
+    const phone = rawData.phone ? sanitizeString(rawData.phone, 20) : 'Não informado';
     const subject = sanitizeString(rawData.subject, 200);
     const message = sanitizeString(rawData.message, 2000);
 
@@ -103,7 +103,7 @@ serve(async (req) => {
         <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p><strong>Nome:</strong> ${name}</p>
           <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Telefone:</strong> ${phone || 'Não informado'}</p>
+          <p><strong>Telefone:</strong> ${phone}</p>
           <p><strong>Assunto:</strong> ${subject}</p>
         </div>
         <h3>Mensagem:</h3>
