@@ -6,14 +6,14 @@ export const useServices = () => {
   return useQuery({
     queryKey: ["services"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("services")
         .select("*")
         .eq("active", true)
         .order("name");
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 };
