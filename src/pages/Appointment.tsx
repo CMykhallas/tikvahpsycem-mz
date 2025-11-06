@@ -26,16 +26,28 @@ const Appointment = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await submitAppointment(formData);
-    if (result.success) {
-      setFormData({
-        client_name: "",
-        email: "",
-        phone: "",
-        service_type: "",
-        preferred_date: "",
-        message: ""
+    
+    // Criar checkout Stripe com os dados do agendamento
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          serviceType: formData.service_type,
+          appointmentData: formData
+        }
       });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data?.url) {
+        // Redirecionar para o Stripe Checkout em nova aba
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      console.error('Erro ao criar checkout:', error);
     }
   };
 
@@ -144,11 +156,10 @@ const Appointment = () => {
                             <SelectValue placeholder="Selecione o serviço" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="consulta-individual">Consulta Psicológica Individual</SelectItem>
-                            <SelectItem value="terapia-casal">Terapia de Casal</SelectItem>
-                            <SelectItem value="avaliacao-psicologica">Avaliação Psicológica</SelectItem>
-                            <SelectItem value="workshop-mindfulness">Workshop Mindfulness</SelectItem>
-                            <SelectItem value="consultoria-organizacional">Consultoria Organizacional</SelectItem>
+                            <SelectItem value="individual">Terapia Individual - $10 USD</SelectItem>
+                            <SelectItem value="casal">Terapia de Casal - $15 USD</SelectItem>
+                            <SelectItem value="familiar">Terapia Familiar - $22 USD</SelectItem>
+                            <SelectItem value="consultoria">Consultoria Organizacional - 35,000 MZN</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -189,8 +200,11 @@ const Appointment = () => {
                       disabled={isLoading}
                       className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300"
                     >
-                      {isLoading ? "Processando..." : "Confirmar Agendamento"}
+                      {isLoading ? "Processando..." : "Prosseguir para Pagamento"}
                     </Button>
+                    <p className="text-sm text-muted-foreground text-center mt-2">
+                      Você será redirecionado para o checkout seguro do Stripe
+                    </p>
                   </form>
                 </CardContent>
               </Card>

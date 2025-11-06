@@ -1,13 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, ArrowRight, Heart, Users, BookOpen } from "lucide-react";
+import { CheckCircle, ArrowRight, Heart, Users, BookOpen, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 import bemEstarImage from "@/assets/bem-estar-psicologia.jpg";
 import consultoriaImage from "@/assets/consultoria-negocios.jpg";
 import formacaoImage from "@/assets/formacao-desenvolvimento.jpg";
 
 const Obrigado = () => {
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('session_id');
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  useEffect(() => {
+    if (sessionId) {
+      setPaymentConfirmed(true);
+    }
+  }, [sessionId]);
+  
   useEffect(() => {
     // Add noindex meta tag to prevent search engine indexing
     const metaRobots = document.createElement('meta');
@@ -60,19 +71,37 @@ const Obrigado = () => {
           </div>
           
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 leading-tight">
-            Obrigado por nos Contactar.
+            {paymentConfirmed ? 'Pagamento Confirmado!' : 'Obrigado por nos Contactar.'}
             <span className="block text-primary mt-2">
               A Sua Jornada de Transformação Começa Aqui.
             </span>
           </h1>
           
           <h2 className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-4xl mx-auto leading-relaxed">
-            A sua mensagem foi recebida com sucesso. A nossa equipa está agora a analisar o seu pedido 
-            com a máxima prioridade. Em breve, entraremos em contacto consigo para iniciar a sua 
-            experiência com a Tikvah.
+            {paymentConfirmed ? (
+              <>
+                O seu agendamento foi confirmado com sucesso e o pagamento foi processado via Stripe. 
+                Receberá um email de confirmação com todos os detalhes da sua consulta.
+              </>
+            ) : (
+              <>
+                A sua mensagem foi recebida com sucesso. A nossa equipa está agora a analisar o seu pedido 
+                com a máxima prioridade. Em breve, entraremos em contacto consigo para iniciar a sua 
+                experiência com a Tikvah.
+              </>
+            )}
           </h2>
           
           <div className="bg-card border border-border rounded-lg p-6 max-w-3xl mx-auto shadow-sm">
+            {paymentConfirmed && (
+              <div className="flex items-center justify-center space-x-4 mb-4 pb-4 border-b border-border">
+                <CreditCard className="w-8 h-8 text-primary" />
+                <div className="text-left">
+                  <h3 className="font-semibold text-lg text-card-foreground">Pagamento Processado</h3>
+                  <p className="text-sm text-muted-foreground">Transação segura via Stripe</p>
+                </div>
+              </div>
+            )}
             <p className="text-lg text-card-foreground leading-relaxed">
               Valorizamos o seu tempo e a sua confiança em nós. Enquanto aguarda, convidamo-lo a 
               explorar como podemos continuar a apoiar o seu bem-estar, crescimento e sucesso, 
