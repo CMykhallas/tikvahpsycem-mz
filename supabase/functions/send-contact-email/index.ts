@@ -160,12 +160,16 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Erro ao enviar email:', error);
+    console.error('Erro ao enviar email de contato:', error);
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Failed to send message',
+        code: 'EMAIL_SEND_ERROR'
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     );
   }

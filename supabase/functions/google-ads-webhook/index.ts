@@ -227,8 +227,9 @@ serve(async (req) => {
       .insert(leadData)
 
     if (insertError) {
+      console.error('Database insertion error:', insertError.message)
       responseStatus = 500
-      errorMessage = `Database error: ${insertError.message}`
+      errorMessage = 'Failed to save lead data'
       throw new Error(errorMessage)
     }
 
