@@ -12,6 +12,57 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-CHECKOUT] ${step}${detailsStr}`);
 };
 
+// Validation utilities
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 255;
+};
+
+const sanitizeString = (input: string, maxLength: number = 1000): string => {
+  if (!input || typeof input !== 'string') return '';
+  return input
+    .replace(/[<>]/g, '')
+    .replace(/javascript:/gi, '')
+    .trim()
+    .slice(0, maxLength);
+};
+
+const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^[\d\s\-\+\(\)]{8,20}$/;
+  return phoneRegex.test(phone);
+};
+
+// Rate limiting store
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (identifier: string, maxRequests: number = 5, windowMs: number = 15 * 60 * 1000): boolean => {
+  const now = Date.now();
+  const record = rateLimitStore.get(identifier);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitStore.set(identifier, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (record.count >= maxRequests) {
+    logStep("Rate limit exceeded", { identifier, count: record.count });
+    return false;
+  }
+  
+  record.count++;
+  return true;
+};
+
+// Cleanup old rate limit entries periodically
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (now > value.resetTime) {
+      rateLimitStore.delete(key);
+    }
+  }
+}, 60000);
+
 // Mapeamento dos tipos de serviço para os price_ids do Stripe
 const SERVICE_PRICES: Record<string, { priceId: string; name: string }> = {
   "individual": { 
@@ -39,6 +90,44 @@ serve(async (req) => {
 
   try {
     logStep("Function started");
+
+    // Validate content-type
+    const contentType = req.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      logStep("Invalid content-type", { contentType });
+      return new Response(
+        JSON.stringify({ error: "Content-Type deve ser application/json" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    // Check payload size
+    const contentLength = req.headers.get("content-length");
+    if (contentLength && parseInt(contentLength) > 10240) {
+      logStep("Payload too large", { contentLength });
+      return new Response(
+        JSON.stringify({ error: "Requisição muito grande" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 413,
+        }
+      );
+    }
+
+    // Rate limiting - use IP address as identifier
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+    if (!checkRateLimit(clientIp, 5, 15 * 60 * 1000)) {
+      return new Response(
+        JSON.stringify({ error: "Muitas requisições. Tente novamente em 15 minutos." }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429,
+        }
+      );
+    }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
@@ -70,9 +159,9 @@ serve(async (req) => {
       );
     }
 
-    // Extrair dados do agendamento
+    // Extrair e validar dados do agendamento
     const appointmentData = requestData.appointmentData;
-    if (!appointmentData || !appointmentData.email) {
+    if (!appointmentData || typeof appointmentData !== 'object') {
       return new Response(
         JSON.stringify({ error: "Dados de agendamento inválidos" }),
         {
@@ -82,12 +171,68 @@ serve(async (req) => {
       );
     }
 
+    // Validate required fields
+    if (!appointmentData.email || !validateEmail(appointmentData.email)) {
+      logStep("Invalid email", { email: appointmentData.email });
+      return new Response(
+        JSON.stringify({ error: "Email inválido" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    if (!appointmentData.client_name || appointmentData.client_name.length < 2) {
+      logStep("Invalid client name");
+      return new Response(
+        JSON.stringify({ error: "Nome do cliente inválido" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    if (!appointmentData.phone || !validatePhone(appointmentData.phone)) {
+      logStep("Invalid phone", { phone: appointmentData.phone });
+      return new Response(
+        JSON.stringify({ error: "Telefone inválido" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    if (!appointmentData.preferred_date) {
+      logStep("Missing preferred date");
+      return new Response(
+        JSON.stringify({ error: "Data preferida é obrigatória" }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
+
+    // Sanitize all input fields
+    const sanitizedData = {
+      client_name: sanitizeString(appointmentData.client_name, 100),
+      email: appointmentData.email.trim().toLowerCase(),
+      phone: sanitizeString(appointmentData.phone, 20),
+      preferred_date: appointmentData.preferred_date,
+      message: sanitizeString(appointmentData.message || "", 2000),
+    };
+
+    logStep("Input validation passed", { email: sanitizedData.email });
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     logStep("Stripe client initialized");
 
     // Verificar se já existe um cliente Stripe
     const customers = await stripe.customers.list({ 
-      email: appointmentData.email, 
+      email: sanitizedData.email, 
       limit: 1 
     });
     
@@ -97,10 +242,10 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    // Criar sessão de checkout
+    // Criar sessão de checkout com dados sanitizados
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      customer_email: customerId ? undefined : appointmentData.email,
+      customer_email: customerId ? undefined : sanitizedData.email,
       line_items: [
         {
           price: serviceConfig.priceId,
@@ -111,11 +256,11 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/obrigado?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/appointment`,
       metadata: {
-        client_name: appointmentData.client_name,
-        phone: appointmentData.phone,
-        email: appointmentData.email,
+        client_name: sanitizedData.client_name,
+        phone: sanitizedData.phone,
+        email: sanitizedData.email,
         service_type: serviceType,
-        preferred_date: appointmentData.preferred_date,
+        preferred_date: sanitizedData.preferred_date,
       },
     });
 
@@ -124,16 +269,16 @@ serve(async (req) => {
       customerId: session.customer 
     });
 
-    // Salvar agendamento no banco com status pending_payment
+    // Salvar agendamento no banco com status pending_payment (dados sanitizados)
     const { error: appointmentError } = await supabaseClient
       .from("appointments")
       .insert({
-        client_name: appointmentData.client_name,
-        email: appointmentData.email,
-        phone: appointmentData.phone,
+        client_name: sanitizedData.client_name,
+        email: sanitizedData.email,
+        phone: sanitizedData.phone,
         service_type: serviceType,
-        preferred_date: appointmentData.preferred_date,
-        message: appointmentData.message || "",
+        preferred_date: sanitizedData.preferred_date,
+        message: sanitizedData.message,
         status: "pending_payment",
       });
 
