@@ -1,11 +1,18 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
+import React from "npm:react@18.3.1";
+import { Resend } from "npm:resend@4.0.0";
+import { renderAsync } from "npm:@react-email/components@0.0.22";
+import { PaymentConfirmationEmail } from "./_templates/payment-confirmation.tsx";
+import { AdminNotificationEmail } from "./_templates/admin-notification.tsx";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -130,10 +137,77 @@ serve(async (req) => {
 
       if (orderError) {
         logStep("Error creating order", { error: orderError.message });
-        // Não falhar o webhook se o pedido não for criado
       } else {
         logStep("Order created successfully");
       }
+
+      // Enviar emails em background
+      EdgeRuntime.waitUntil(
+        (async () => {
+          try {
+            logStep("Starting email notifications");
+
+            const currency = session.currency || "usd";
+            const amount = session.amount_total || 0;
+
+            // Email para o cliente
+            const clientHtml = await renderAsync(
+              React.createElement(PaymentConfirmationEmail, {
+                clientName: session.metadata?.client_name || appointment.client_name,
+                serviceType: session.metadata?.service_type || appointment.service_type,
+                preferredDate: session.metadata?.preferred_date || appointment.preferred_date,
+                amount: amount,
+                currency: currency,
+                sessionId: session.id,
+              })
+            );
+
+            const { error: clientEmailError } = await resend.emails.send({
+              from: "Tikvah Psicologia <onboarding@resend.dev>",
+              to: [session.customer_email || session.customer_details?.email || appointment.email],
+              subject: "Pagamento Confirmado - Tikvah Psicologia",
+              html: clientHtml,
+            });
+
+            if (clientEmailError) {
+              logStep("Error sending client email", { error: clientEmailError });
+            } else {
+              logStep("Client confirmation email sent successfully");
+            }
+
+            // Email para admin
+            const adminHtml = await renderAsync(
+              React.createElement(AdminNotificationEmail, {
+                clientName: session.metadata?.client_name || appointment.client_name,
+                clientEmail: session.customer_email || session.customer_details?.email || appointment.email,
+                clientPhone: session.metadata?.phone || appointment.phone,
+                serviceType: session.metadata?.service_type || appointment.service_type,
+                preferredDate: session.metadata?.preferred_date || appointment.preferred_date,
+                amount: amount,
+                currency: currency,
+                sessionId: session.id,
+                message: appointment.message,
+              })
+            );
+
+            const { error: adminEmailError } = await resend.emails.send({
+              from: "Tikvah Sistema <onboarding@resend.dev>",
+              to: ["suporte.oficina.psicologo@proton.me"],
+              subject: `Novo Pagamento - ${session.metadata?.client_name || appointment.client_name}`,
+              html: adminHtml,
+            });
+
+            if (adminEmailError) {
+              logStep("Error sending admin email", { error: adminEmailError });
+            } else {
+              logStep("Admin notification email sent successfully");
+            }
+          } catch (emailError) {
+            const emailErrorMsg = emailError instanceof Error ? emailError.message : String(emailError);
+            logStep("Error in email sending process", { error: emailErrorMsg });
+          }
+        })()
+      );
     }
 
     return new Response(JSON.stringify({ received: true }), {

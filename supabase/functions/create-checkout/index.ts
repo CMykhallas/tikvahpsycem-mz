@@ -113,6 +113,7 @@ serve(async (req) => {
       metadata: {
         client_name: appointmentData.client_name,
         phone: appointmentData.phone,
+        email: appointmentData.email,
         service_type: serviceType,
         preferred_date: appointmentData.preferred_date,
       },
