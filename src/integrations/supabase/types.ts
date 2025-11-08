@@ -71,6 +71,41 @@ export type Database = {
         }
         Relationships: []
       }
+      cart: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contacts: {
         Row: {
           created_at: string
@@ -149,9 +184,14 @@ export type Database = {
       orders: {
         Row: {
           amount: number
+          bank_transfer_reference: string | null
           created_at: string
           id: string
           metadata: Json | null
+          mpesa_reference: string | null
+          payment_method: string | null
+          phone_number: string | null
+          products: Json | null
           status: string
           stripe_session_id: string | null
           updated_at: string
@@ -159,9 +199,14 @@ export type Database = {
         }
         Insert: {
           amount: number
+          bank_transfer_reference?: string | null
           created_at?: string
           id?: string
           metadata?: Json | null
+          mpesa_reference?: string | null
+          payment_method?: string | null
+          phone_number?: string | null
+          products?: Json | null
           status?: string
           stripe_session_id?: string | null
           updated_at?: string
@@ -169,13 +214,84 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bank_transfer_reference?: string | null
           created_at?: string
           id?: string
           metadata?: Json | null
+          mpesa_reference?: string | null
+          payment_method?: string | null
+          phone_number?: string | null
+          products?: Json | null
           status?: string
           stripe_session_id?: string | null
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string
+          currency: string
+          description: string
+          discount_percentage: number | null
+          duration_minutes: number | null
+          featured: boolean | null
+          id: string
+          image_url: string | null
+          location: string
+          long_description: string | null
+          metadata: Json | null
+          name: string
+          price: number
+          price_after_discount: number | null
+          slug: string
+          stock_quantity: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          created_at?: string
+          currency?: string
+          description: string
+          discount_percentage?: number | null
+          duration_minutes?: number | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          long_description?: string | null
+          metadata?: Json | null
+          name: string
+          price: number
+          price_after_discount?: number | null
+          slug: string
+          stock_quantity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          discount_percentage?: number | null
+          duration_minutes?: number | null
+          featured?: boolean | null
+          id?: string
+          image_url?: string | null
+          location?: string
+          long_description?: string | null
+          metadata?: Json | null
+          name?: string
+          price?: number
+          price_after_discount?: number | null
+          slug?: string
+          stock_quantity?: number | null
+          updated_at?: string
         }
         Relationships: []
       }

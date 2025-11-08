@@ -42,6 +42,13 @@ import TraumaCulturalResiliencia from "./pages/blog/TraumaCulturalResiliencia";
 import ACTTerapiaContextos from "./pages/blog/ACTTerapiaContextos";
 import PsicologiaOrganizacional from "./pages/blog/PsicologiaOrganizacional";
 
+// Shop pages
+import Loja from "./pages/Loja";
+import Carrinho from "./pages/Carrinho";
+import Checkout from "./pages/Checkout";
+import ProductDetail from "./pages/ProductDetail";
+import Success from "./pages/Success";
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -78,6 +85,13 @@ function App() {
               <Route path="/services/consultoria" element={<Consultoria />} />
               <Route path="/services/cursos" element={<Cursos />} />
               <Route path="/services/workshops" element={<Workshops />} />
+              
+              {/* Shop Routes */}
+              <Route path="/loja" element={<Loja />} />
+              <Route path="/carrinho" element={<Carrinho />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/produto/:slug" element={<ProductDetail />} />
+              <Route path="/success" element={<Success />} />
               
               {/* Blog Routes */}
               <Route path="/blog/mbsr-meta-analise-eficacia" element={<MBSRMetaAnalise />} />
