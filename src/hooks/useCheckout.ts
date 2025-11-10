@@ -23,9 +23,18 @@ export const useCheckout = () => {
       }
       
       return { success: true, data };
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao criar sessão de checkout:", error);
-      toast.error("Erro ao processar pagamento. Tente novamente.");
+      
+      // Mostrar mensagem específica de segurança se disponível
+      if (error.message?.includes('Price validation failed')) {
+        toast.error("Erro de validação de preço. Por favor, recarregue a página.");
+      } else if (error.message?.includes('Rate limit')) {
+        toast.error("Muitas tentativas. Por favor, aguarde alguns minutos.");
+      } else {
+        toast.error("Erro ao processar pagamento. Tente novamente.");
+      }
+      
       return { success: false };
     } finally {
       setIsLoading(false);
