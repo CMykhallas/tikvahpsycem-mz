@@ -139,6 +139,33 @@ export type Database = {
         }
         Relationships: []
       }
+      ip_blacklist: {
+        Row: {
+          blocked_at: string
+          expires_at: string | null
+          id: string
+          ip_address: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          blocked_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          blocked_at?: string
+          expires_at?: string | null
+          id?: string
+          ip_address?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           ad_group_id: string | null
@@ -189,11 +216,13 @@ export type Database = {
           id: string
           metadata: Json | null
           mpesa_reference: string | null
+          order_access_token: string | null
           payment_method: string | null
           phone_number: string | null
           products: Json | null
           status: string
           stripe_session_id: string | null
+          token_expires_at: string | null
           updated_at: string
           user_id: string | null
         }
@@ -204,11 +233,13 @@ export type Database = {
           id?: string
           metadata?: Json | null
           mpesa_reference?: string | null
+          order_access_token?: string | null
           payment_method?: string | null
           phone_number?: string | null
           products?: Json | null
           status?: string
           stripe_session_id?: string | null
+          token_expires_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -219,11 +250,13 @@ export type Database = {
           id?: string
           metadata?: Json | null
           mpesa_reference?: string | null
+          order_access_token?: string | null
           payment_method?: string | null
           phone_number?: string | null
           products?: Json | null
           status?: string
           stripe_session_id?: string | null
+          token_expires_at?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -321,22 +354,64 @@ export type Database = {
       }
       rate_limits: {
         Row: {
+          blocked_until: string | null
           count: number
           created_at: string
+          first_request_at: string | null
           key: string
           reset_time: string
         }
         Insert: {
+          blocked_until?: string | null
           count?: number
           created_at?: string
+          first_request_at?: string | null
           key: string
           reset_time: string
         }
         Update: {
+          blocked_until?: string | null
           count?: number
           created_at?: string
+          first_request_at?: string | null
           key?: string
           reset_time?: string
+        }
+        Relationships: []
+      }
+      security_incidents: {
+        Row: {
+          created_at: string
+          details: Json | null
+          endpoint: string | null
+          id: string
+          incident_type: string
+          ip_address: string
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          endpoint?: string | null
+          id?: string
+          incident_type: string
+          ip_address: string
+          severity: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          endpoint?: string | null
+          id?: string
+          incident_type?: string
+          ip_address?: string
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -421,6 +496,20 @@ export type Database = {
     }
     Functions: {
       clean_old_rate_limits: { Args: never; Returns: undefined }
+      cleanup_expired_blacklist: { Args: never; Returns: undefined }
+      cleanup_expired_rate_limits: { Args: never; Returns: undefined }
+      daily_security_cleanup: { Args: never; Returns: undefined }
+      get_security_stats: {
+        Args: { time_window?: unknown }
+        Returns: {
+          blocked_ips: number
+          critical_incidents: number
+          price_tampering_attempts: number
+          rate_limit_violations: number
+          total_incidents: number
+          unique_ips: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
