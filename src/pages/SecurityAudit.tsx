@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SecurityAuditReport } from '@/components/admin/SecurityAuditReport';
+import { RealTimeSecurityDashboard } from '@/components/admin/RealTimeSecurityDashboard';
 import { useAuth } from '@/hooks/useAuth';
 import { SEOHead } from '@/components/SEOHead';
 
@@ -44,7 +44,7 @@ const SecurityAudit = () => {
             </p>
           </div>
           
-          <SecurityAuditReport />
+          <RealTimeSecurityDashboard />
         </div>
       </div>
     </>
