@@ -50,13 +50,16 @@ export const CheckoutForm = () => {
 
       if (error) throw error;
 
+      // Armazenar token de acesso ao pedido
+      const accessToken = data.order?.accessToken;
+      
       if (paymentMethod === "stripe") {
         // Redirecionar para Stripe Checkout
         window.open(data.checkoutUrl, "_blank");
         toast.success("Redirecionando para pagamento...");
         setTimeout(() => {
           clearCart();
-          navigate("/success");
+          navigate(`/success?order_id=${data.orderId}&token=${accessToken}`);
         }, 2000);
       } else if (paymentMethod === "mpesa") {
         // Processar M-Pesa
@@ -76,7 +79,7 @@ export const CheckoutForm = () => {
         if (mpesaData.success) {
           toast.success("Pagamento M-Pesa processado com sucesso!");
           clearCart();
-          navigate("/success");
+          navigate(`/success?order_id=${data.orderId}&token=${accessToken}`);
         } else {
           toast.error("Erro ao processar pagamento M-Pesa");
         }
@@ -84,7 +87,7 @@ export const CheckoutForm = () => {
         // Transferência bancária
         toast.success("Pedido criado! Detalhes da transferência enviados por email.");
         clearCart();
-        navigate(`/success?order_id=${data.orderId}`);
+        navigate(`/success?order_id=${data.orderId}&token=${accessToken}`);
       }
     } catch (error: any) {
       console.error("Erro no checkout:", error);

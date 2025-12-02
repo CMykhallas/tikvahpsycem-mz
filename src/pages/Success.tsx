@@ -1,21 +1,69 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Home, ShoppingBag } from "lucide-react";
+import { CheckCircle, Home, ShoppingBag, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+interface OrderData {
+  id: string;
+  amount: number;
+  status: string;
+  payment_method: string;
+  created_at: string;
+  metadata: {
+    customer_name: string;
+    customer_email: string;
+  };
+}
 
 const Success = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const orderId = searchParams.get("order_id");
+  const token = searchParams.get("token");
+  
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Limpar carrinho se chegou aqui
     localStorage.removeItem("tikvah-cart");
-  }, []);
+    
+    // Buscar dados do pedido com token de acesso
+    const fetchOrderData = async () => {
+      if (!orderId || !token) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('id, amount, status, payment_method, created_at, metadata')
+          .eq('id', orderId)
+          .eq('order_access_token', token)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Erro ao buscar pedido:', error);
+          toast.error('Não foi possível carregar os detalhes do pedido');
+        } else if (data) {
+          setOrderData(data as OrderData);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar pedido:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchOrderData();
+  }, [orderId, token]);
 
   return (
     <>
@@ -48,7 +96,44 @@ const Success = () => {
                     </p>
                   </div>
 
-                  {orderId && (
+                  {isLoading ? (
+                    <div className="flex justify-center py-6">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : orderData ? (
+                    <div className="space-y-4">
+                      <div className="bg-muted/50 rounded-lg p-4 border border-border">
+                        <p className="text-sm text-muted-foreground mb-1">Número do Pedido:</p>
+                        <p className="text-lg font-mono font-bold text-foreground">{orderData.id}</p>
+                      </div>
+
+                      <div className="bg-muted/50 rounded-lg p-4 border border-border text-left">
+                        <h3 className="font-semibold text-foreground mb-3">Detalhes do Pedido</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Cliente:</span>
+                            <span className="font-medium text-foreground">{orderData.metadata?.customer_name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Email:</span>
+                            <span className="font-medium text-foreground">{orderData.metadata?.customer_email}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Total:</span>
+                            <span className="font-bold text-foreground">{(orderData.amount / 100).toLocaleString()} MZN</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Método de Pagamento:</span>
+                            <span className="font-medium text-foreground capitalize">{orderData.payment_method.replace('_', ' ')}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Status:</span>
+                            <span className="font-medium text-foreground capitalize">{orderData.status}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : orderId && (
                     <div className="bg-muted/50 rounded-lg p-4 border border-border">
                       <p className="text-sm text-muted-foreground mb-1">Número do Pedido:</p>
                       <p className="text-lg font-mono font-bold text-foreground">{orderId}</p>
@@ -68,6 +153,14 @@ const Success = () => {
                         <li>✅ Guarde o número do pedido para referência</li>
                       </ul>
                     </div>
+
+                    {token && (
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                          <span className="font-semibold">🔒 Link Seguro:</span> Guarde este link para acompanhar seu pedido. Ele expira em 30 dias.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex gap-4 justify-center pt-6">
