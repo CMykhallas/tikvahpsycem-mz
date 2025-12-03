@@ -1,21 +1,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Menu, X } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated, user, signOut, loading } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -57,11 +48,6 @@ export const Navbar = () => {
       ]
     }
   ];
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
-  };
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
@@ -115,38 +101,13 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Button and Auth */}
-          <div className="hidden lg:flex items-center space-x-4">
+          {/* CTA Button */}
+          <div className="hidden lg:flex items-center">
             <Link to="/appointment">
               <Button className="btn-primary-gradient">
                 Agendar Consulta
               </Button>
             </Link>
-            
-            {!loading && (
-              <>
-                {isAuthenticated ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="flex items-center space-x-2">
-                        <User className="w-4 h-4" />
-                        <span>{user?.email}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={handleSignOut}>
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sair
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <Link to="/auth">
-                    <Button variant="outline">Entrar</Button>
-                  </Link>
-                )}
-              </>
-            )}
           </div>
 
           {/* Mobile menu button */}
@@ -194,34 +155,12 @@ export const Navbar = () => {
                   )}
                 </div>
               ))}
-              <div className="pt-4 border-t border-slate-200 space-y-2">
+              <div className="pt-4 border-t border-slate-200">
                 <Link to="/appointment" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full btn-primary-gradient">
                     Agendar Consulta
                   </Button>
                 </Link>
-                
-                {!loading && (
-                  <>
-                    {isAuthenticated ? (
-                      <Button 
-                        variant="outline" 
-                        className="w-full" 
-                        onClick={() => {
-                          handleSignOut();
-                          setIsMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="w-4 h-4 mr-2" />
-                        Sair
-                      </Button>
-                    ) : (
-                      <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                        <Button variant="outline" className="w-full">Entrar</Button>
-                      </Link>
-                    )}
-                  </>
-                )}
               </div>
             </div>
           </div>
