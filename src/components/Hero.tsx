@@ -70,16 +70,6 @@ export const Hero = () => {
                     Nossos Serviços
                   </Button>
                 </Link>
-                <Link to="/auth" aria-describedby="cta-auth">
-                  <Button 
-                    variant="ghost" 
-                    size="lg"
-                    className="text-slate-600 hover:text-teal-700 hover:bg-white/50 px-4 py-2 rounded-full text-base font-medium transition-all duration-300"
-                    id="cta-auth"
-                  >
-                    Entrar
-                  </Button>
-                </Link>
               </nav>
 
               {/* Statistics com lista semântica */}
