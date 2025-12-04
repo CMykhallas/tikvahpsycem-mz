@@ -499,6 +499,18 @@ export type Database = {
       cleanup_expired_blacklist: { Args: never; Returns: undefined }
       cleanup_expired_rate_limits: { Args: never; Returns: undefined }
       daily_security_cleanup: { Args: never; Returns: undefined }
+      get_order_by_token: {
+        Args: { p_order_id: string; p_token: string }
+        Returns: {
+          amount: number
+          created_at: string
+          id: string
+          metadata: Json
+          payment_method: string
+          products: Json
+          status: string
+        }[]
+      }
       get_security_stats: {
         Args: { time_window?: unknown }
         Returns: {
