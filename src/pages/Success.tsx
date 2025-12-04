@@ -42,18 +42,22 @@ const Success = () => {
       }
 
       try {
+        // Use secure database function that validates token server-side
         const { data, error } = await supabase
-          .from('orders')
-          .select('id, amount, status, payment_method, created_at, metadata')
-          .eq('id', orderId)
-          .eq('order_access_token', token)
+          .rpc('get_order_by_token', { 
+            p_order_id: orderId, 
+            p_token: token 
+          })
           .maybeSingle();
 
         if (error) {
           console.error('Erro ao buscar pedido:', error);
           toast.error('Não foi possível carregar os detalhes do pedido');
         } else if (data) {
-          setOrderData(data as OrderData);
+          setOrderData({
+            ...data,
+            metadata: data.metadata as { customer_name: string; customer_email: string }
+          } as OrderData);
         }
       } catch (error) {
         console.error('Erro ao buscar pedido:', error);
