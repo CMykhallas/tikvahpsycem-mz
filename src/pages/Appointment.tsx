@@ -8,13 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, User, Phone, Mail, MessageCircle } from "lucide-react";
+import { Calendar, Clock, User, Phone, Mail, MessageCircle, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppointment } from "@/hooks/useAppointment";
 import { ServicesGrid } from "@/components/ServicesGrid";
 
 const Appointment = () => {
   const { submitAppointment, isLoading } = useAppointment();
+  const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
     client_name: "",
     email: "",
@@ -35,11 +36,10 @@ const Appointment = () => {
     }
     
     // Criar checkout Stripe com os dados do agendamento
+    setIsProcessing(true);
     try {
       const { supabase } = await import("@/integrations/supabase/client");
       const { toast } = await import("sonner");
-      
-      toast.loading("Criando sessão de pagamento...");
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
@@ -50,31 +50,27 @@ const Appointment = () => {
 
       if (error) {
         console.error('Erro da função:', error);
-        toast.dismiss();
         toast.error(error.message || "Erro ao criar checkout. Tente novamente.");
         return;
       }
 
       if (data?.error) {
-        toast.dismiss();
         toast.error(data.error);
         return;
       }
 
       if (data?.url) {
-        toast.dismiss();
         toast.success("Redirecionando para pagamento seguro...");
-        // Redirecionar para o Stripe Checkout em nova aba
         window.open(data.url, '_blank');
       } else {
-        toast.dismiss();
         toast.error("Erro ao gerar link de pagamento. Tente novamente.");
       }
     } catch (error: any) {
       console.error('Erro ao criar checkout:', error);
       const { toast } = await import("sonner");
-      toast.dismiss();
       toast.error(error.message || "Erro ao processar. Tente novamente.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -224,10 +220,17 @@ const Appointment = () => {
 
                     <Button 
                       type="submit" 
-                      disabled={isLoading}
+                      disabled={isProcessing || isLoading}
                       className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300"
                     >
-                      {isLoading ? "Processando..." : "Prosseguir para Pagamento"}
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Criando sessão de pagamento...
+                        </>
+                      ) : (
+                        "Prosseguir para Pagamento"
+                      )}
                     </Button>
                     <p className="text-sm text-muted-foreground text-center mt-2">
                       Você será redirecionado para o checkout seguro do Stripe

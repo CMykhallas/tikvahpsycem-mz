@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
-import { CreditCard, Smartphone, Building2, Lock } from "lucide-react";
+import { CreditCard, Smartphone, Building2, Lock, Loader2 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -215,7 +215,14 @@ export const CheckoutForm = () => {
             className="w-full"
             disabled={isProcessing}
           >
-            {isProcessing ? "Processando..." : `Pagar ${getTotal().toLocaleString()} MZN`}
+            {isProcessing ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Processando pagamento...
+              </>
+            ) : (
+              `Pagar ${getTotal().toLocaleString()} MZN`
+            )}
           </Button>
         </form>
       </CardContent>
