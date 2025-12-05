@@ -77,13 +77,12 @@ export const useAppointment = () => {
         return { success: false };
       }
 
-      // Validate service type
+      // Validate service type - must match create-checkout SERVICE_PRICES
       const allowedServices = [
-        'consulta-individual',
-        'terapia-casal', 
-        'avaliacao-psicologica',
-        'workshop-mindfulness',
-        'consultoria-organizacional'
+        'individual',
+        'casal', 
+        'familiar',
+        'consultoria'
       ];
 
       if (!allowedServices.includes(sanitizedFormData.service_type)) {
