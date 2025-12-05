@@ -27,9 +27,19 @@ const Appointment = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validação básica no frontend
+    if (!formData.client_name || !formData.email || !formData.phone || !formData.service_type || !formData.preferred_date) {
+      const { toast } = await import("sonner");
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+    
     // Criar checkout Stripe com os dados do agendamento
     try {
       const { supabase } = await import("@/integrations/supabase/client");
+      const { toast } = await import("sonner");
+      
+      toast.loading("Criando sessão de pagamento...");
       
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: {
@@ -39,15 +49,32 @@ const Appointment = () => {
       });
 
       if (error) {
-        throw error;
+        console.error('Erro da função:', error);
+        toast.dismiss();
+        toast.error(error.message || "Erro ao criar checkout. Tente novamente.");
+        return;
+      }
+
+      if (data?.error) {
+        toast.dismiss();
+        toast.error(data.error);
+        return;
       }
 
       if (data?.url) {
+        toast.dismiss();
+        toast.success("Redirecionando para pagamento seguro...");
         // Redirecionar para o Stripe Checkout em nova aba
         window.open(data.url, '_blank');
+      } else {
+        toast.dismiss();
+        toast.error("Erro ao gerar link de pagamento. Tente novamente.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar checkout:', error);
+      const { toast } = await import("sonner");
+      toast.dismiss();
+      toast.error(error.message || "Erro ao processar. Tente novamente.");
     }
   };
 

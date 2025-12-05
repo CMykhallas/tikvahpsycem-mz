@@ -1,11 +1,10 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, MapPin } from "lucide-react";
-import { useCheckout } from "@/hooks/useCheckout";
+import { useNavigate } from "react-router-dom";
 
 interface ServiceCardProps {
   id: string;
@@ -26,10 +25,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
   duration_minutes,
   category
 }) => {
-  const { createCheckoutSession, isLoading } = useCheckout();
+  const navigate = useNavigate();
 
-  const handleCheckout = async () => {
-    await createCheckoutSession(id);
+  const handleCheckout = () => {
+    // Redirecionar para página de agendamento
+    navigate('/appointment');
   };
 
   return (
@@ -76,10 +76,9 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         <CardFooter>
           <Button 
             onClick={handleCheckout}
-            disabled={isLoading}
             className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300"
           >
-            {isLoading ? "Processando..." : "Agendar Agora"}
+            Agendar Agora
           </Button>
         </CardFooter>
       </Card>

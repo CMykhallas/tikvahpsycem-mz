@@ -359,12 +359,14 @@ export class PriceValidator {
           continue;
         }
         
-        if (!dbProduct.active) {
+        // Verificar se produto está ativo (considerar null como ativo)
+        if (dbProduct.active === false) {
           tamperedProducts.push(`${clientProduct.id}: Product inactive`);
           continue;
         }
         
-        if (dbProduct.stock_quantity < clientProduct.quantity) {
+        // Verificar stock (considerar null como estoque ilimitado)
+        if (dbProduct.stock_quantity !== null && dbProduct.stock_quantity < clientProduct.quantity) {
           tamperedProducts.push(`${clientProduct.id}: Insufficient stock (${dbProduct.stock_quantity} available, ${clientProduct.quantity} requested)`);
           continue;
         }
