@@ -1,10 +1,11 @@
 // =========================================
 // SECURITY ALERT WEBHOOK
-// Sends critical security alerts to Slack/Discord
+// Sends critical security alerts via Email, Slack, and Discord
 // =========================================
 
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2';
+import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,6 +22,80 @@ interface SecurityIncident {
   endpoint?: string;
   details?: any;
 }
+
+const formatIncidentDetailsHtml = (incident: SecurityIncident): string => {
+  const severityColor = incident.severity === 'critical' ? '#dc2626' : '#f97316';
+  const severityLabel = incident.severity === 'critical' ? '🔴 CRÍTICO' : '🟠 ALTO';
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 20px; background: #f8f9fa; }
+        .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header { background: ${severityColor}; color: white; padding: 20px; text-align: center; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 24px; }
+        .field { margin-bottom: 16px; }
+        .field-label { font-weight: 600; color: #374151; margin-bottom: 4px; }
+        .field-value { color: #1f2937; background: #f3f4f6; padding: 8px 12px; border-radius: 4px; font-family: monospace; }
+        .details-box { background: #1f2937; color: #e5e7eb; padding: 12px; border-radius: 4px; font-family: monospace; font-size: 12px; overflow-x: auto; white-space: pre-wrap; }
+        .footer { background: #f3f4f6; padding: 16px; text-align: center; color: #6b7280; font-size: 12px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: 600; background: ${severityColor}; color: white; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🚨 Alerta de Segurança</h1>
+        </div>
+        <div class="content">
+          <div class="field">
+            <div class="field-label">Severidade</div>
+            <div><span class="badge">${severityLabel}</span></div>
+          </div>
+          <div class="field">
+            <div class="field-label">Tipo de Incidente</div>
+            <div class="field-value">${incident.incident_type}</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Endereço IP</div>
+            <div class="field-value">${incident.ip_address}</div>
+          </div>
+          ${incident.endpoint ? `
+          <div class="field">
+            <div class="field-label">Endpoint</div>
+            <div class="field-value">${incident.endpoint}</div>
+          </div>
+          ` : ''}
+          ${incident.user_agent ? `
+          <div class="field">
+            <div class="field-label">User Agent</div>
+            <div class="field-value">${incident.user_agent}</div>
+          </div>
+          ` : ''}
+          <div class="field">
+            <div class="field-label">Data/Hora</div>
+            <div class="field-value">${new Date(incident.created_at).toLocaleString('pt-PT', { timeZone: 'Africa/Maputo' })}</div>
+          </div>
+          ${incident.details ? `
+          <div class="field">
+            <div class="field-label">Detalhes Técnicos</div>
+            <div class="details-box">${JSON.stringify(incident.details, null, 2)}</div>
+          </div>
+          ` : ''}
+        </div>
+        <div class="footer">
+          <p>Este é um alerta automático do sistema de segurança Tikvah Psicologia.</p>
+          <p>ID do Incidente: ${incident.id}</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -54,7 +129,36 @@ serve(async (req) => {
       );
     }
 
-    const alerts: Promise<Response>[] = [];
+    const alerts: Promise<any>[] = [];
+    let emailSent = false;
+
+    // =========================================
+    // EMAIL ALERT (PRIMARY - Always tries to send)
+    // =========================================
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (resendApiKey) {
+      const resend = new Resend(resendApiKey);
+      const severityLabel = incident.severity === 'critical' ? 'CRÍTICO' : 'ALTO';
+      
+      const emailPromise = resend.emails.send({
+        from: 'Tikvah Security <onboarding@resend.dev>',
+        to: ['suporte.oficina.psicologo@proton.me'],
+        subject: `🚨 [${severityLabel}] Alerta de Segurança - ${incident.incident_type}`,
+        html: formatIncidentDetailsHtml(incident),
+      }).then(result => {
+        if (result.error) {
+          console.error('❌ [EMAIL] Failed to send:', result.error);
+        } else {
+          console.log('✅ [EMAIL] Security alert sent successfully');
+          emailSent = true;
+        }
+        return result;
+      });
+
+      alerts.push(emailPromise);
+    } else {
+      console.log('⚠️ [EMAIL] RESEND_API_KEY not configured');
+    }
 
     // =========================================
     // SLACK WEBHOOK
@@ -179,11 +283,11 @@ serve(async (req) => {
     }
 
     if (alerts.length === 0) {
-      console.log('⚠️ [ALERT] No webhook URLs configured');
+      console.log('⚠️ [ALERT] No notification channels configured');
       return new Response(
         JSON.stringify({ 
           success: false, 
-          message: 'No webhook URLs configured. Please set SLACK_WEBHOOK_URL or DISCORD_WEBHOOK_URL secrets.' 
+          message: 'No notification channels configured. Please set RESEND_API_KEY, SLACK_WEBHOOK_URL, or DISCORD_WEBHOOK_URL secrets.' 
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -195,13 +299,14 @@ serve(async (req) => {
     const successCount = results.filter(r => r.status === 'fulfilled').length;
     const failedCount = results.filter(r => r.status === 'rejected').length;
 
-    console.log(`✅ [ALERT] Sent ${successCount} alerts, ${failedCount} failed`);
+    console.log(`✅ [ALERT] Sent ${successCount} alerts, ${failedCount} failed, emailSent: ${emailSent}`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         sent: successCount,
-        failed: failedCount
+        failed: failedCount,
+        emailSent
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
