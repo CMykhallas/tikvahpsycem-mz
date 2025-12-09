@@ -1,12 +1,17 @@
-
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[SEND-CONTACT-EMAIL] ${step}${detailsStr}`);
 };
 
 // Input validation and sanitization
@@ -22,19 +27,41 @@ function sanitizeString(str: string, maxLength: number): string {
   return str
     .trim()
     .slice(0, maxLength)
-    .replace(/[<>]/g, '') // Remove potential HTML injection characters
-    .replace(/[\r\n]+/g, '\n'); // Normalize line breaks
+    .replace(/[<>]/g, '')
+    .replace(/[\r\n]+/g, '\n');
 }
 
-function validateContactData(data: any): { valid: boolean; error?: string } {
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+interface ContactData {
+  name: string;
+  email: string;
+  phone?: string;
+  subject: string;
+  message: string;
+}
+
+function validateContactData(data: unknown): { valid: boolean; error?: string; data?: ContactData } {
   if (!data || typeof data !== 'object') {
     return { valid: false, error: 'Invalid request payload' };
   }
 
-  const { name, email, subject, message } = data;
+  const { name, email, subject, message } = data as Record<string, unknown>;
 
   if (!name || !email || !subject || !message) {
     return { valid: false, error: 'Missing required fields' };
+  }
+
+  if (typeof name !== 'string' || typeof email !== 'string' || 
+      typeof subject !== 'string' || typeof message !== 'string') {
+    return { valid: false, error: 'Invalid field types' };
   }
 
   if (!validateEmail(email)) {
@@ -45,15 +72,34 @@ function validateContactData(data: any): { valid: boolean; error?: string } {
     return { valid: false, error: 'Input exceeds maximum length' };
   }
 
-  return { valid: true };
+  return { 
+    valid: true, 
+    data: { 
+      name, 
+      email, 
+      phone: typeof (data as Record<string, unknown>).phone === 'string' 
+        ? (data as Record<string, unknown>).phone as string 
+        : undefined,
+      subject, 
+      message 
+    } 
+  };
 }
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
+  // Initialize Supabase client with service_role
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
+
   try {
+    logStep('Function started');
+
     // Validate content type
     const contentType = req.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
@@ -76,8 +122,8 @@ serve(async (req) => {
 
     // Validate input data
     const validation = validateContactData(rawData);
-    if (!validation.valid) {
-      console.error('Validation failed:', validation.error);
+    if (!validation.valid || !validation.data) {
+      logStep('Validation failed', { error: validation.error });
       return new Response(
         JSON.stringify({ error: validation.error }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -85,34 +131,46 @@ serve(async (req) => {
     }
 
     // Sanitize all inputs
-    const name = sanitizeString(rawData.name, 100);
-    const email = rawData.email.trim().toLowerCase();
-    const phone = rawData.phone ? sanitizeString(rawData.phone, 20) : 'Não informado';
-    const subject = sanitizeString(rawData.subject, 200);
-    const message = sanitizeString(rawData.message, 2000);
+    const name = sanitizeString(validation.data.name, 100);
+    const email = validation.data.email.trim().toLowerCase();
+    const phone = validation.data.phone ? sanitizeString(validation.data.phone, 20) : 'Não informado';
+    const subject = sanitizeString(validation.data.subject, 200);
+    const message = sanitizeString(validation.data.message, 2000);
 
-    console.log('Enviando email de contato:', { name, email, subject });
+    logStep('Sending contact email', { email, subject });
+
+    // Escape HTML for email content
+    const safeName = escapeHtml(name);
+    const safeSubject = escapeHtml(subject);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+    const safePhone = escapeHtml(phone);
 
     // Send notification email to admin
     const adminEmailResponse = await resend.emails.send({
       from: 'Tikvah Psycem <onboarding@resend.dev>',
-      to: ['suporte.oficina.psicologo@proton.me'], // Admin email
-      subject: `Nova mensagem de contato: ${subject}`,
+      to: ['suporte.oficina.psicologo@proton.me'],
+      subject: `Nova mensagem de contato: ${safeSubject}`,
       html: `
-        <h2>Nova mensagem de contato recebida</h2>
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <p><strong>Nome:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Telefone:</strong> ${phone}</p>
-          <p><strong>Assunto:</strong> ${subject}</p>
-        </div>
-        <h3>Mensagem:</h3>
-        <div style="background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
-          ${message.replace(/\n/g, '<br>')}
-        </div>
-        <p style="color: #666; font-size: 12px; margin-top: 20px;">
-          Esta mensagem foi enviada através do formulário de contato do site.
-        </p>
+        <!DOCTYPE html>
+        <html lang="pt">
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1a365d;">Nova mensagem de contato recebida</h2>
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3182ce;">
+            <p style="margin: 8px 0;"><strong>Nome:</strong> ${safeName}</p>
+            <p style="margin: 8px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 8px 0;"><strong>Telefone:</strong> ${safePhone}</p>
+            <p style="margin: 8px 0;"><strong>Assunto:</strong> ${safeSubject}</p>
+          </div>
+          <h3 style="color: #2d3748;">Mensagem:</h3>
+          <div style="background: #fff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            ${safeMessage}
+          </div>
+          <p style="color: #718096; font-size: 12px; margin-top: 20px;">
+            Recebido em: ${new Date().toLocaleString('pt-BR', { timeZone: 'Africa/Maputo' })}
+          </p>
+        </body>
+        </html>
       `,
     });
 
@@ -122,37 +180,51 @@ serve(async (req) => {
       to: [email],
       subject: 'Mensagem recebida - Obrigado pelo contato!',
       html: `
-        <h2>Olá, ${name}!</h2>
-        <p>Recebemos sua mensagem e entraremos em contato em breve.</p>
-        
-        <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3>Resumo da sua mensagem:</h3>
-          <p><strong>Assunto:</strong> ${subject}</p>
-          <p><strong>Mensagem:</strong></p>
-          <div style="background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; margin-top: 10px;">
-            ${message.replace(/\n/g, '<br>')}
+        <!DOCTYPE html>
+        <html lang="pt">
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1a365d;">Olá, ${safeName}!</h2>
+          <p style="color: #4a5568;">Recebemos sua mensagem e entraremos em contato em breve.</p>
+          
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2d3748; margin-top: 0;">Resumo da sua mensagem:</h3>
+            <p><strong>Assunto:</strong> ${safeSubject}</p>
+            <div style="background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 4px; margin-top: 10px;">
+              ${safeMessage}
+            </div>
           </div>
-        </div>
-        
-        <p>Agradecemos o seu interesse e responderemos em até 24 horas.</p>
-        
-        <p style="color: #666; font-size: 12px; margin-top: 20px;">
-          Esta é uma mensagem automática. Por favor, não responda a este email.
-        </p>
+          
+          <p style="color: #4a5568;">Agradecemos o seu interesse e responderemos em até 24 horas úteis.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+          
+          <p style="color: #718096; font-size: 12px;">
+            Tikvah Psychological Center<br>
+            Avenida 24 de Julho, Nº 797, 1º Andar<br>
+            Maputo, Moçambique
+          </p>
+        </body>
+        </html>
       `,
     });
 
-    console.log('Emails enviados:', { 
+    logStep('Emails sent successfully', { 
       adminEmailId: adminEmailResponse.data?.id, 
       userEmailId: userEmailResponse.data?.id 
     });
 
+    // Log to audit table
+    await supabase.from('audit_logs').insert({
+      action: 'CONTACT_EMAIL_SENT',
+      table_name: 'contacts',
+      new_data: { email, subject, timestamp: new Date().toISOString() }
+    }).catch(() => {});
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Email enviado com sucesso',
-        adminEmailId: adminEmailResponse.data?.id,
-        userEmailId: userEmailResponse.data?.id
+        message: 'Email enviado com sucesso'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -160,7 +232,8 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Erro ao enviar email de contato:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep('Error sending email', { error: errorMessage });
     
     return new Response(
       JSON.stringify({ 
