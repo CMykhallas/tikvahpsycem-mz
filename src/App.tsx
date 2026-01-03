@@ -26,6 +26,7 @@ import Obrigado from "./pages/Obrigado";
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import NotFound from "./pages/NotFound";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import Auth from "./pages/Auth";
 
 // Services pages
 import Psicoterapia from "./pages/services/Psicoterapia";
@@ -97,6 +98,7 @@ function App() {
               <Route path="/blog/psicologia-organizacional-transformacao-digital" element={<PsicologiaOrganizacional />} />
               
               {/* Admin Routes */}
+              <Route path="/auth" element={<Auth />} />
               <Route path="/security" element={<SecurityDashboard />} />
               
               {/* 404 Route */}
