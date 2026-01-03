@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSecurityIncidents, SecurityIncident } from '@/hooks/useSecurityIncidents';
+import { useAuth } from '@/hooks/useAuth';
+import { useExportReport } from '@/hooks/useExportReport';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,8 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { Shield, ShieldAlert, ShieldX, Ban, Activity, AlertTriangle, Clock, RefreshCw, ArrowLeft, TrendingUp, Globe } from 'lucide-react';
+import { Shield, ShieldAlert, ShieldX, Ban, Activity, AlertTriangle, Clock, RefreshCw, ArrowLeft, TrendingUp, Globe, Download, FileSpreadsheet, FileText, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, subDays, startOfDay, eachDayOfInterval } from 'date-fns';
 import { pt } from 'date-fns/locale';
@@ -25,8 +29,22 @@ const CHART_COLORS = ['#8b5cf6', '#06b6d4', '#f97316', '#22c55e', '#ec4899'];
 
 const SecurityDashboard = () => {
   const { incidents, blockedIPs, stats, loading, fetchIncidents, fetchBlockedIPs, fetchStats } = useSecurityIncidents();
+  const { user, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { exportToCSV, exportToPDF } = useExportReport();
   const [timeRange, setTimeRange] = useState('24h');
   const [refreshing, setRefreshing] = useState(false);
+  const navigate = useNavigate();
+
+  // Redirect to auth if not logged in or not admin
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        navigate('/auth', { state: { from: '/security' } });
+      } else if (!isAdmin) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, isAdmin, authLoading, navigate]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -41,6 +59,21 @@ const SecurityDashboard = () => {
   const handleTimeRangeChange = (value: string) => {
     setTimeRange(value);
     fetchStats(value === '24h' ? '24 hours' : value === '7d' ? '7 days' : '30 days');
+  };
+
+  const handleExportCSV = () => {
+    const rangeLabel = timeRange === '24h' ? 'Últimas 24 horas' : timeRange === '7d' ? 'Últimos 7 dias' : 'Últimos 30 dias';
+    exportToCSV(incidents, blockedIPs, stats, rangeLabel);
+  };
+
+  const handleExportPDF = () => {
+    const rangeLabel = timeRange === '24h' ? 'Últimas 24 horas' : timeRange === '7d' ? 'Últimos 7 dias' : 'Últimos 30 dias';
+    exportToPDF(incidents, blockedIPs, stats, rangeLabel);
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   // Process incidents for trend chart
@@ -112,7 +145,7 @@ const SecurityDashboard = () => {
     return format(new Date(dateStr), "dd/MM/yyyy HH:mm", { locale: pt });
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -121,6 +154,11 @@ const SecurityDashboard = () => {
         </div>
       </div>
     );
+  }
+
+  // Show nothing while redirecting
+  if (!user || !isAdmin) {
+    return null;
   }
 
   return (
@@ -147,12 +185,12 @@ const SecurityDashboard = () => {
                     Dashboard de Segurança
                   </h1>
                   <p className="text-sm text-muted-foreground">
-                    Monitorização em tempo real
+                    Monitorização em tempo real • {user.email}
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Select value={timeRange} onValueChange={handleTimeRangeChange}>
                   <SelectTrigger className="w-[130px]">
                     <Clock className="h-4 w-4 mr-2" />
@@ -164,10 +202,33 @@ const SecurityDashboard = () => {
                     <SelectItem value="30d">Últimos 30 dias</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <Download className="h-4 w-4 mr-2" />
+                      Exportar
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportCSV}>
+                      <FileSpreadsheet className="h-4 w-4 mr-2" />
+                      Exportar CSV
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportPDF}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Exportar PDF
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 
                 <Button onClick={handleRefresh} disabled={refreshing} variant="outline">
                   <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
                   Actualizar
+                </Button>
+
+                <Button onClick={handleSignOut} variant="ghost" size="icon" title="Terminar sessão">
+                  <LogOut className="h-4 w-4" />
                 </Button>
               </div>
             </div>
