@@ -13,18 +13,16 @@ import {
 } from '@/utils/dataMasking';
 
 /**
- * Hook for applying data masking based on user role
+ * Hook para aplicar mascaramento de dados baseado no papel do usuário
  */
 export const useMaskedData = () => {
   const { isAdmin, user } = useAuth();
   
-  // Determine masking level based on role
-  // For now, we assume non-admins get partial masking
-  // Admins still get partial masking for extra security
+  // CORREÇÃO: Adicionado 'none' para Admins, permitindo que os IFs abaixo sejam válidos
   const maskingLevel: MaskingLevel = useMemo(() => {
-    if (isAdmin) return 'partial';
-    if (user) return 'partial'; // Staff would be here
-    return 'full';
+    if (isAdmin) return 'none'; // Admins veem tudo (ou mude para 'partial' se desejar mascaramento parcial)
+    if (user) return 'partial'; // Staff/User logado
+    return 'full';              // Deslogado/Público
   }, [isAdmin, user]);
   
   const config = useMemo(() => getMaskingConfig(
@@ -32,7 +30,7 @@ export const useMaskedData = () => {
   ), [isAdmin, user]);
   
   /**
-   * Mask an email address
+   * Mascarar e-mail
    */
   const maskedEmail = (email: string | null | undefined): string => {
     if (maskingLevel === 'none') return email || '';
@@ -40,7 +38,7 @@ export const useMaskedData = () => {
   };
   
   /**
-   * Mask a phone number
+   * Mascarar telefone
    */
   const maskedPhone = (phone: string | null | undefined): string => {
     if (maskingLevel === 'none') return phone || '';
@@ -48,16 +46,16 @@ export const useMaskedData = () => {
   };
   
   /**
-   * Mask a name
+   * Mascarar nome
    */
   const maskedName = (name: string | null | undefined): string => {
-    // Names are only masked for non-authenticated users
+    // Nomes costumam ser visíveis para admin e usuários autenticados
     if (maskingLevel === 'none' || maskingLevel === 'partial') return name || '';
     return maskName(name);
   };
   
   /**
-   * Mask a payment reference
+   * Mascarar referência de pagamento
    */
   const maskedPaymentRef = (ref: string | null | undefined): string => {
     if (maskingLevel === 'none') return ref || '';
@@ -65,135 +63,69 @@ export const useMaskedData = () => {
   };
   
   /**
-   * Mask an access token
+   * Mascarar token de acesso (Sempre mascarado por segurança)
    */
   const maskedToken = (token: string | null | undefined): string => {
-    // Tokens are always masked
     return maskAccessToken(token);
   };
   
   /**
-   * Mask an IP address
+   * Mascarar endereço IP
    */
   const maskedIp = (ip: string | null | undefined): string => {
-    // IPs are only fully visible to admins
-    if (isAdmin && maskingLevel === 'none') return ip || '';
+    // IPs só são visíveis se o nível for 'none'
+    if (maskingLevel === 'none') return ip || '';
     return maskIpAddress(ip);
   };
   
   /**
-   * Mask metadata object
+   * Mascarar objeto de metadados
    */
   const maskedMeta = (metadata: Record<string, any> | null | undefined) => {
     if (maskingLevel === 'none') return metadata;
     return maskMetadata(metadata);
   };
-  
-  /**
-   * Format order data with masked fields
-   */
-  const maskOrderData = (order: {
-    id: string;
-    phone_number?: string | null;
-    mpesa_reference?: string | null;
-    bank_transfer_reference?: string | null;
-    order_access_token?: string | null;
-    metadata?: Record<string, any> | null;
-    [key: string]: any;
-  }) => {
-    return {
-      ...order,
-      phone_number: maskedPhone(order.phone_number),
-      mpesa_reference: maskedPaymentRef(order.mpesa_reference),
-      bank_transfer_reference: maskedPaymentRef(order.bank_transfer_reference),
-      order_access_token: maskedToken(order.order_access_token),
-      metadata: maskedMeta(order.metadata)
-    };
-  };
-  
-  /**
-   * Format contact data with masked fields
-   */
-  const maskContactData = (contact: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string | null;
-    [key: string]: any;
-  }) => {
-    return {
-      ...contact,
-      email: maskedEmail(contact.email),
-      phone: maskedPhone(contact.phone)
-    };
-  };
-  
-  /**
-   * Format appointment data with masked fields
-   */
-  const maskAppointmentData = (appointment: {
-    id: string;
-    client_name: string;
-    email: string;
-    phone: string;
-    [key: string]: any;
-  }) => {
-    return {
-      ...appointment,
-      email: maskedEmail(appointment.email),
-      phone: maskedPhone(appointment.phone)
-    };
-  };
-  
-  /**
-   * Format lead data with masked fields
-   */
-  const maskLeadData = (lead: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string | null;
-    [key: string]: any;
-  }) => {
-    return {
-      ...lead,
-      email: maskedEmail(lead.email),
-      phone: maskedPhone(lead.phone)
-    };
-  };
-  
-  /**
-   * Format profile data with masked fields
-   */
-  const maskProfileData = (profile: {
-    id: string;
-    email: string;
-    full_name?: string | null;
-    [key: string]: any;
-  }) => {
-    return {
-      ...profile,
-      email: maskedEmail(profile.email)
-    };
-  };
-  
-  /**
-   * Format security incident data with masked fields
-   */
-  const maskSecurityIncidentData = (incident: {
-    id: string;
-    ip_address: string;
-    user_agent?: string | null;
-    details?: Record<string, any> | null;
-    [key: string]: any;
-  }) => {
-    return {
-      ...incident,
-      ip_address: maskedIp(incident.ip_address),
-      details: maskedMeta(incident.details)
-    };
-  };
-  
+
+  // --- Funções de Formatação de Objetos ---
+
+  const maskOrderData = (order: any) => ({
+    ...order,
+    phone_number: maskedPhone(order.phone_number),
+    mpesa_reference: maskedPaymentRef(order.mpesa_reference),
+    bank_transfer_reference: maskedPaymentRef(order.bank_transfer_reference),
+    order_access_token: maskedToken(order.order_access_token),
+    metadata: maskedMeta(order.metadata)
+  });
+
+  const maskContactData = (contact: any) => ({
+    ...contact,
+    email: maskedEmail(contact.email),
+    phone: maskedPhone(contact.phone)
+  });
+
+  const maskAppointmentData = (appointment: any) => ({
+    ...appointment,
+    email: maskedEmail(appointment.email),
+    phone: maskedPhone(appointment.phone)
+  });
+
+  const maskLeadData = (lead: any) => ({
+    ...lead,
+    email: maskedEmail(lead.email),
+    phone: maskedPhone(lead.phone)
+  });
+
+  const maskProfileData = (profile: any) => ({
+    ...profile,
+    email: maskedEmail(profile.email)
+  });
+
+  const maskSecurityIncidentData = (incident: any) => ({
+    ...incident,
+    ip_address: maskedIp(incident.ip_address),
+    details: maskedMeta(incident.details)
+  });
+
   return {
     maskingLevel,
     config,
