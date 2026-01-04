@@ -1,6 +1,7 @@
 // =========================================
 // SECURE ORDER CREATION ENDPOINT
 // Enterprise-grade security implementation
+// With field-level encryption for sensitive data
 // =========================================
 
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
@@ -14,6 +15,8 @@ import {
   TokenGenerator,
   securityMiddleware
 } from '../_shared/security.ts';
+
+import { encryptField } from '../_shared/encryption.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -202,7 +205,16 @@ serve(async (req) => {
     const orderToken = TokenGenerator.generateOrderToken();
 
     // =========================================
-    // FASE 5: ORDER CREATION
+    // FASE 5: ENCRYPT SENSITIVE FIELDS
+    // =========================================
+    console.log('🔐 [SECURITY] Encrypting sensitive fields');
+
+    // Encrypt phone number and access token
+    const encryptedPhone = await encryptField(phone);
+    const encryptedToken = await encryptField(orderToken.token);
+
+    // =========================================
+    // FASE 6: ORDER CREATION
     // =========================================
     console.log('📝 [DATABASE] Creating order with validated data');
 
@@ -216,15 +228,16 @@ serve(async (req) => {
         metadata: {
           customer_name: sanitizedName,
           customer_email: email,
-          customer_phone: phone,
+          // Phone stored encrypted in dedicated field
           ip_address: ip,
           user_agent: userAgent,
           validated: true,
-          validation_timestamp: new Date().toISOString()
+          validation_timestamp: new Date().toISOString(),
+          encryption_version: 1
         },
-        order_access_token: orderToken.token,
+        order_access_token: JSON.stringify(encryptedToken),
         token_expires_at: orderToken.expiresAt.toISOString(),
-        phone_number: phone,
+        phone_number: JSON.stringify(encryptedPhone),
         user_id: null // Pedido anônimo
       })
       .select()
@@ -238,7 +251,7 @@ serve(async (req) => {
     console.log('✅ [SUCCESS] Order created', { orderId: order.id, total: order.amount });
 
     // =========================================
-    // FASE 6: PAYMENT PROCESSING
+    // FASE 7: PAYMENT PROCESSING
     // =========================================
     let checkoutUrl: string | null = null;
 
