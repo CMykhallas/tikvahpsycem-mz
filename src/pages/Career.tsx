@@ -213,7 +213,7 @@ const Career = () => {
               Enviar Currículo
             </a>
             <a 
-              href="https://wa.me/258827592980" 
+              href="https://wa.me/258828926020" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-8 py-3 border border-teal-600 text-teal-600 rounded-lg hover:bg-teal-50 transition-colors"

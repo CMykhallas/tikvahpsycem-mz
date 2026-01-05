@@ -299,7 +299,7 @@ const Contact = () => {
                   className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-green-600"
                 >
                   <a 
-                    href="https://wa.me/258827592980?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
+                    href="https://wa.me/258828926020?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
