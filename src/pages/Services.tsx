@@ -26,6 +26,8 @@ import {
   Wrench,
   MessageCircle
 } from "lucide-react";
+import consultoriaNegocios from "@/assets/consultoria-negocios.jpg";
+import formacaoDesenvolvimento from "@/assets/formacao-desenvolvimento.jpg";
 
 const Services = () => {
   const mainServices = [
@@ -165,8 +167,12 @@ const Services = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      {/* Hero Section */}
+      {/* Hero Section with Image */}
       <section className="services-hero relative">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${consultoriaNegocios})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-primary/70" />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
@@ -227,6 +233,20 @@ const Services = () => {
                 </Card>
               );
             })}
+          </div>
+
+          {/* Training Image Banner */}
+          <div className="relative mb-12 rounded-2xl overflow-hidden shadow-xl">
+            <img 
+              src={formacaoDesenvolvimento} 
+              alt="Sessão de formação profissional em Maputo"
+              className="w-full h-64 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent" />
+            <div className="absolute bottom-6 left-6 text-white">
+              <h3 className="text-2xl font-bold mb-2">Formação de Excelência</h3>
+              <p className="text-white/90">Desenvolvimento profissional contínuo para sua equipe</p>
+            </div>
           </div>
 
           {/* Comprehensive Services */}

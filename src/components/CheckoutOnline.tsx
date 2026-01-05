@@ -40,7 +40,7 @@ export const CheckoutOnline = ({ service, amount, currency, onSuccess, onCancel 
       icon: Smartphone,
       description: "Pagamento móvel M-Pesa",
       enabled: true,
-      phone: "+258827592980" // WhatsApp link for M-Pesa
+      phone: "+258828926020" // WhatsApp link for M-Pesa
     },
     {
       id: "emola",

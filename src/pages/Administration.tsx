@@ -42,9 +42,8 @@ const Administration = () => {
       }
     ],
     phones: [
-      { number: "+258 82 759 2980", description: "Linha de atendimento técnico" },
-      { number: "+258 82 892 6020", description: "Linha de apoio e informações operacionais" },
-      { number: "+258 855 487 746", description: "Suporte adicional" }
+      { number: "+258 82 892 6020", description: "Linha de atendimento técnico" },
+      { number: "+258 85 548 7746", description: "Linha de apoio e informações operacionais" }
     ],
     addresses: [
       {
@@ -267,7 +266,7 @@ const Administration = () => {
                 <MessageCircle className="w-16 h-16 mx-auto mb-6" />
                 <h4 className="text-2xl font-bold mb-4">WhatsApp Business</h4>
                 <p className="text-white/90 mb-6">Atendimento direto e imediato</p>
-                <p className="text-lg font-semibold mb-4">+258 82 759 2980</p>
+                <p className="text-lg font-semibold mb-4">+258 82 892 6020</p>
                 <Button 
                   asChild
                   variant="outline" 
@@ -275,7 +274,7 @@ const Administration = () => {
                   className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-green-600"
                 >
                   <a 
-                    href="https://wa.me/258827592980?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
+                    href="https://wa.me/258828926020?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >

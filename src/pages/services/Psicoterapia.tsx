@@ -88,12 +88,12 @@ const Psicoterapia = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="https://wa.me/258827592980" 
+              href="https://wa.me/258828926020" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              WhatsApp: +258 82 759 2980
+              WhatsApp: +258 82 892 6020
             </a>
             <a 
               href="mailto:suporte.oficina.psicologo@proton.me"

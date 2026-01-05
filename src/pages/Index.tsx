@@ -24,7 +24,7 @@ const Index = () => {
     "url": "https://tikvahpsycem-mz.lovable.app",
     "logo": "/tikvah-logo.jpg",
     "image": "https://tikvahpsycem-mz.lovable.app/og-image.jpg",
-    "telephone": "+258827592980",
+    "telephone": "+258828926020",
     "email": "suporte.oficina.psicologo@proton.me",
     "address": {
       "@type": "PostalAddress",
