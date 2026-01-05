@@ -140,9 +140,8 @@ const Contact = () => {
                     <div className="flex items-start space-x-3">
                       <Phone className="w-5 h-5 text-accent mt-1" />
                       <div className="text-foreground">
-                        <p>+258 82 759 2980 (Principal)</p>
                         <p>+258 82 892 6020</p>
-                        <p>+258 855 487 746</p>
+                        <p>+258 85 548 7746</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
