@@ -23,8 +23,8 @@ const COMPANY_INFO = {
 
 const CONTACT_INFO = {
   phones: [
-    { number: "+258 82 759 2980", label: "Linha Principal", href: "tel:+258827592980" },
-    { number: "+258 82 892 6020", label: "Agendamentos", href: "tel:+258828926020" },
+    { number: "+258 82 892 6020", label: "Linha Principal", href: "tel:+258828926020" },
+    { number: "+258 85 548 7746", label: "Agendamentos", href: "tel:+258855487746" },
   ],
   emails: [
     { address: "suporte.oficina.psicologo@proton.me", label: "Suporte" },
@@ -41,7 +41,7 @@ const SOCIAL_LINKS = [
   { icon: Linkedin, href: "https://www.linkedin.com/company/tikvah-psycem", label: "LinkedIn" },
   { icon: Facebook, href: "https://www.facebook.com/consultoriotikvah", label: "Facebook" },
   { icon: Instagram, href: "https://instagram.com/opm_moz", label: "Instagram" },
-  { icon: MessageCircle, href: "https://wa.me/258827592980", label: "WhatsApp", primary: true },
+  { icon: MessageCircle, href: "https://wa.me/258828926020", label: "WhatsApp", primary: true },
 ];
 
 const NAV_SECTIONS = {
