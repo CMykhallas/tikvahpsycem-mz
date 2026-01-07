@@ -140,8 +140,8 @@ const Contact = () => {
                     <div className="flex items-start space-x-3">
                       <Phone className="w-5 h-5 text-accent mt-1" />
                       <div className="text-foreground">
-                        <p>+258 82 892 6020 (Chamadas/SMS)</p>
-                        <p>+258 82 759 2980 (WhatsApp)</p>
+                        <p><a href="tel:+258828926020" className="hover:text-primary transition-colors">+258 82 892 6020</a> (Chamadas/SMS)</p>
+                        <p><a href="https://wa.me/258827592980" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">+258 82 759 2980</a> (WhatsApp)</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
