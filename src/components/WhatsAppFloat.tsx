@@ -5,7 +5,7 @@ import { Card, CardContent } from "./ui/card";
 
 export const WhatsAppFloat = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const whatsappNumber = "258828926020";
+  const whatsappNumber = "258827592980";
   
   const departments = [
     {
