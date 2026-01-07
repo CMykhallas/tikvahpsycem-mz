@@ -42,8 +42,8 @@ const Administration = () => {
       }
     ],
     phones: [
-      { number: "+258 82 892 6020", description: "Linha de atendimento (Chamadas/SMS)" },
-      { number: "+258 82 759 2980", description: "WhatsApp Business" }
+      { number: "+258 82 892 6020", description: "Linha de atendimento (Chamadas/SMS)", href: "tel:+258828926020" },
+      { number: "+258 82 759 2980", description: "WhatsApp Business", href: "https://wa.me/258827592980" }
     ],
     addresses: [
       {
@@ -158,7 +158,14 @@ const Administration = () => {
                   <CardContent className="p-6">
                     <Phone className="w-8 h-8 text-primary mx-auto mb-4" />
                     <h4 className="text-xl font-bold text-foreground mb-2">
-                      {phone.number}
+                      <a 
+                        href={phone.href} 
+                        target={phone.href.startsWith('https') ? '_blank' : undefined}
+                        rel={phone.href.startsWith('https') ? 'noopener noreferrer' : undefined}
+                        className="hover:text-primary transition-colors"
+                      >
+                        {phone.number}
+                      </a>
                     </h4>
                     <p className="text-sm text-muted-foreground">
                       {phone.description}
@@ -266,7 +273,7 @@ const Administration = () => {
                 <MessageCircle className="w-16 h-16 mx-auto mb-6" />
                 <h4 className="text-2xl font-bold mb-4">WhatsApp Business</h4>
                 <p className="text-white/90 mb-6">Atendimento direto e imediato</p>
-                <p className="text-lg font-semibold mb-4">+258 82 759 2980</p>
+                <p className="text-lg font-semibold mb-4"><a href="https://wa.me/258827592980" target="_blank" rel="noopener noreferrer" className="hover:underline">+258 82 759 2980</a></p>
                 <Button 
                   asChild
                   variant="outline" 
