@@ -27,7 +27,7 @@ const FAQ = () => {
       {
         id: "1",
         question: "Como posso agendar uma consulta?",
-        answer: "Você pode agendar através do nosso sistema online, por telefone (+258 82 892 6020) ou WhatsApp. Basta preencher o formulário com seus dados e preferências de horário.",
+        answer: "Você pode agendar através do nosso sistema online, por telefone (+258 82 892 6020) ou WhatsApp (+258 82 759 2980). Basta preencher o formulário com seus dados e preferências de horário.",
         category: "Agendamento"
       },
       {
@@ -209,12 +209,12 @@ const FAQ = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a 
-              href="https://wa.me/258828926020" 
+              href="https://wa.me/258827592980" 
               target="_blank" 
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
-              WhatsApp: +258 82 892 6020
+              WhatsApp: +258 82 759 2980
             </a>
             <a 
               href="mailto:suporte.oficina.psicologo@proton.me"

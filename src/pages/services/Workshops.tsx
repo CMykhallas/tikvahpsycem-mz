@@ -119,7 +119,7 @@ const Workshops = () => {
               </Button>
             </Link>
             <a 
-              href="https://wa.me/258828926020" 
+              href="https://wa.me/258827592980" 
               target="_blank" 
               rel="noopener noreferrer"
             >

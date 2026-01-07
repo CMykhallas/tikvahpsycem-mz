@@ -140,18 +140,18 @@ const Location = () => {
                 </div>
                 <div className="space-y-3">
                   <p className="text-slate-600">
-                    <strong>Telefone:</strong> +258 82 892 6020
+                    <strong>Telefone:</strong> +258 82 892 6020 (Chamadas/SMS)
                   </p>
                   <p className="text-slate-600">
-                    <strong>Telefone 2:</strong> +258 85 548 7746
+                    <strong>WhatsApp:</strong> +258 82 759 2980
                   </p>
                   <a 
-                    href="https://wa.me/258828926020" 
+                    href="https://wa.me/258827592980" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                   >
-                    WhatsApp: +258 82 892 6020
+                    WhatsApp: +258 82 759 2980
                   </a>
                 </div>
               </CardContent>

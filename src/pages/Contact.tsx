@@ -140,8 +140,8 @@ const Contact = () => {
                     <div className="flex items-start space-x-3">
                       <Phone className="w-5 h-5 text-accent mt-1" />
                       <div className="text-foreground">
-                        <p>+258 82 892 6020</p>
-                        <p>+258 85 548 7746</p>
+                        <p>+258 82 892 6020 (Chamadas/SMS)</p>
+                        <p>+258 82 759 2980 (WhatsApp)</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
@@ -299,7 +299,7 @@ const Contact = () => {
                   className="bg-white/10 border-white/20 text-white hover:bg-white hover:text-green-600"
                 >
                   <a 
-                    href="https://wa.me/258828926020?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
+                    href="https://wa.me/258827592980?text=Olá! Gostaria de informações sobre os serviços do Centro Tikvah." 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
