@@ -135,7 +135,7 @@ export const CheckoutForm = () => {
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
-                placeholder="Bhulamantha Kubhula"
+                placeholder="João Silva"
                 required
               />
             </div>
@@ -147,7 +147,7 @@ export const CheckoutForm = () => {
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="bkhubula@example.com"
+                placeholder="joao@example.com"
                 required
               />
             </div>

@@ -5,8 +5,6 @@
 
 const ENCRYPTION_VERSION = 1;
 
-import { createClient } from 'npm:@supabase/supabase-js@2'
-
 /**
  * Generate a random initialization vector
  */

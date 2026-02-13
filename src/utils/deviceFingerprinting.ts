@@ -47,9 +47,10 @@ export class CanvasFingerprinter {
       let glFingerprint = '';
 
       if (gl) {
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (debugInfo) {
-          glFingerprint = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        const _debugInfo = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info');
+        if (_debugInfo) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          glFingerprint = (gl as WebGLRenderingContext).getParameter((_debugInfo as any).UNMASKED_RENDERER_WEBGL);
         }
       }
 
@@ -126,11 +127,11 @@ export class DeviceFingerprinter {
   private static getWebGLFingerprint(): string {
     try {
       const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') as WebGLRenderingContext | null;
       
       if (!gl) return 'no_webgl';
 
-      const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      const _debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
       const vendor = gl.getParameter(gl.VENDOR);
       const renderer = gl.getParameter(gl.RENDERER);
       const version = gl.getParameter(gl.VERSION);
@@ -148,12 +149,13 @@ export class DeviceFingerprinter {
   private static async getHardwareFingerprint(): Promise<string> {
     try {
       const cores = navigator.hardwareConcurrency || 0;
-      const memory = (navigator as any).deviceMemory || 0;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const _memory = ((navigator as any).deviceMemory as undefined | number) || 0;
       const maxTouchPoints = navigator.maxTouchPoints || 0;
       const vendor = navigator.vendor;
       const platform = navigator.platform;
 
-      const fingerprint = `${cores}|${memory}|${maxTouchPoints}|${vendor}|${platform}`;
+      const fingerprint = `${cores}|${_memory}|${maxTouchPoints}|${vendor}|${platform}`;
       return this.hash(fingerprint);
     } catch {
       return 'hardware_error';
@@ -169,9 +171,9 @@ export class DeviceFingerprinter {
         width,
         height,
         colorDepth,
-        pixelDepth,
-        devicePixelRatio
+        pixelDepth
       } = window.screen;
+      const devicePixelRatio = window.devicePixelRatio || 1;
 
       const fingerprint = `${width}x${height}|${colorDepth}|${pixelDepth}|${devicePixelRatio}`;
       return this.hash(fingerprint);
@@ -238,11 +240,12 @@ export class DeviceFingerprinter {
    */
   private static getAudioFingerprint(): string {
     try {
-      const AudioContext = (window as any).AudioContext || (window as any).webkitAudioContext;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const AudioContextType = ((window as any).AudioContext || (window as any).webkitAudioContext) as typeof AudioContext | undefined;
       
-      if (!AudioContext) return 'no_audio_context';
+      if (!AudioContextType) return 'no_audio_context';
 
-      const context = new AudioContext();
+      const context = new AudioContextType();
       
       // Criar oscilador
       const osc = context.createOscillator();

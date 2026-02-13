@@ -2,7 +2,7 @@
 // ENTERPRISE-GRADE SECURITY UTILITIES
 // =========================================
 
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient, SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
 // =========================================
 // TYPES & INTERFACES
@@ -54,128 +54,18 @@ export class SecurityLogger {
     this.supabase = supabase;
   }
 
-  /**
-   * Redacts sensitive information from details object
-   * Removes passwords, tokens, secrets, API keys, file paths, stack traces, connection strings
-   */
-  private sanitizeDetails(details: Record<string, any>): Record<string, any> {
-    const sensitiveKeys = [
-      'password', 'passwd', 'pwd', 'secret', 'token', 'apikey', 'api_key',
-      'authorization', 'auth', 'bearer', 'jwt', 'sessionid', 'session_id',
-      'stripe_key', 'mpesa_secret', 'webhook_secret', 'private_key',
-      'access_token', 'refresh_token', 'client_secret'
-    ];
-
-    const sensitivePatterns = [
-      /password["\s]*[:=]/gi,
-      /secret["\s]*[:=]/gi,
-      /token["\s]*[:=]/gi,
-      /api[_-]?key["\s]*[:=]/gi,
-      /auth["\s]*[:=]/gi,
-      /bearer\s+[\w.-]+/gi,
-      /bearer=[\w.-]+/gi,
-      /^[A-Za-z0-9+/=]{20,}$/,  // Possible base64 encoded secrets
-    ];
-
-    const stackTracePatterns = [
-      /at\s+[\w.]+\s*\(/gi,
-      /\/.*\.(js|ts|py|java):[\d:]+/gi,
-      /File\s+"[^"]+":[\d]+/gi,
-      /function\s+[\w_$][\w\d_$]*\s*\(/gi
-    ];
-
-    const filePathPatterns = [
-      /\/home\/[^\s"]*/gi,
-      /\/root\/[^\s"]*/gi,
-      /C:\\Users\\[^\s"]*/gi,
-      /\/opt\/[^\s"]*/gi,
-      /\/var\/[^\s"]*/gi
-    ];
-
-    const sanitized = { ...details };
-
-    // Recursively sanitize object
-    const sanitizeValue = (key: string, value: any): any => {
-      const keyLower = key.toLowerCase();
-
-      // Check if key matches sensitive patterns
-      if (sensitiveKeys.some(sk => keyLower.includes(sk))) {
-        return '[REDACTED]';
-      }
-
-      // Handle string values
-      if (typeof value === 'string') {
-        let sanitizedString = value;
-
-        // Remove passwords/tokens
-        sensitivePatterns.forEach(pattern => {
-          sanitizedString = sanitizedString.replace(pattern, '[REDACTED]');
-        });
-
-        // Remove stack traces
-        stackTracePatterns.forEach(pattern => {
-          sanitizedString = sanitizedString.replace(pattern, '[STACK_TRACE_REMOVED]');
-        });
-
-        // Remove file paths
-        filePathPatterns.forEach(pattern => {
-          sanitizedString = sanitizedString.replace(pattern, '[PATH_REMOVED]');
-        });
-
-        // Remove connection strings
-        if (/(?:mongodb|mysql|postgres|mssql|redis):\/\/[^\s]+/i.test(sanitizedString)) {
-          sanitizedString = sanitizedString.replace(
-            /(?:mongodb|mysql|postgres|mssql|redis):\/\/[^\s]+/gi,
-            '[CONNECTION_STRING_REMOVED]'
-          );
-        }
-
-        // Truncate user agents to prevent fingerprinting
-        if (keyLower.includes('user_agent')) {
-          sanitizedString = sanitizedString.slice(0, 100);
-        }
-
-        return sanitizedString;
-      }
-
-      // Handle objects recursively
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        return this.sanitizeDetails(value);
-      }
-
-      // Handle arrays
-      if (Array.isArray(value)) {
-        return value.map(item => 
-          typeof item === 'object' && item !== null ? this.sanitizeDetails(item) : item
-        );
-      }
-
-      return value;
-    };
-
-    // Apply sanitization
-    for (const [key, value] of Object.entries(sanitized)) {
-      sanitized[key] = sanitizeValue(key, value);
-    }
-
-    return sanitized;
-  }
-
   async logIncident(incident: SecurityIncident): Promise<void> {
     try {
-      // Sanitize details to remove sensitive information
-      const sanitizedDetails = this.sanitizeDetails(incident.details);
-
       const { error } = await this.supabase
         .from('security_incidents')
         .insert({
           incident_type: incident.incident_type,
           severity: incident.severity,
           ip_address: incident.ip_address,
-          user_agent: incident.user_agent ? incident.user_agent.slice(0, 100) : undefined,
+          user_agent: incident.user_agent,
           user_id: incident.user_id,
           endpoint: incident.endpoint,
-          details: sanitizedDetails,
+          details: incident.details,
           created_at: new Date().toISOString()
         });
 
@@ -189,7 +79,7 @@ export class SecurityLogger {
           type: incident.incident_type,
           ip: incident.ip_address,
           endpoint: incident.endpoint,
-          details: sanitizedDetails
+          details: incident.details
         });
       }
     } catch (error) {

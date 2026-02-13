@@ -1,360 +1,249 @@
-/**
- * TIKVAH PSYCHOLOGICAL CENTER - EDGE GATEWAY
- * Contact Form Integration Service (Production Grade)
- * * Versão: 2.1.0
- * Stack: Deno, Supabase, Resend
- */
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// --- CONFIGURAÇÕES GLOBAIS ---
-const CONFIG = {
-  EMAIL_SENDER: "Tikvah Psycem <onboarding@resend.dev>",
-  ADMIN_RECIPIENT: "suporte.oficina.psicologo@proton.me",
-  RATE_LIMIT_MAX: 5,           // Submissões por hora
-  RATE_LIMIT_WINDOW: 3600000,  // 1 hora em ms
-  MIN_SUBMISSION_TIME: 3000,   // 3 segundos (anti-bot)
-  MAX_SUBMISSION_TIME: 86400000, // 24 horas
-  MAX_PAYLOAD_SIZE: 15360,     // 15KB
-  MAX_FIELD_LENGTHS: {
-    name: 120,
-    subject: 200,
-    message: 3000,
-    phone: 30,
-    email: 255
-  }
+const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SPAM_KEYWORDS = [
-  "crypto", "viagra", "casino", "free money", "lottery", "pills", 
-  "poker", "betting", "investing", "bitcoin", "weight loss"
-];
-
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-submission-token",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Content-Type": "application/json",
+const logStep = (step: string, details?: Record<string, unknown>) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[SEND-CONTACT-EMAIL] ${step}${detailsStr}`);
 };
 
-// --- INTERFACES ---
-interface RequestPayload {
+// Input validation and sanitization
+const MAX_PAYLOAD_SIZE = 10240; // 10KB
+
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function sanitizeString(str: string, maxLength: number): string {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .trim()
+    .slice(0, maxLength)
+    .replace(/[<>]/g, '')
+    .replace(/[\r\n]+/g, '\n');
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+interface ContactData {
   name: string;
   email: string;
   phone?: string;
   subject: string;
   message: string;
-  website_url?: string; // Honeypot
-  submission_token?: string; // Timestamp Base64
 }
 
-interface SecurityLog {
-  ip_address: string;
-  event_type: "SPAM_ATTEMPT" | "RATE_LIMIT_EXCEEDED" | "SUCCESSFUL_SUBMISSION" | "SYSTEM_ERROR";
-  severity: "info" | "warning" | "critical";
-  details: Record<string, unknown>;
-}
-
-// --- UTILITÁRIOS DE SEGURANÇA E HIGIENE ---
-
-/**
- * Escapa caracteres para prevenir injeção de HTML/Scripts nos e-mails
- */
-function escapeHTML(str: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#039;',
-  };
-  return str.replace(/[&<>"']/g, (m) => map[m]);
-}
-
-/**
- * Sanitiza strings removendo tags e limitando tamanho
- */
-function sanitizeInput(str: string, maxLength: number): string {
-  if (!str || typeof str !== 'string') return "";
-  return str
-    .trim()
-    .replace(/<[^>]*>?/gm, '') // Remove HTML tags
-    .slice(0, maxLength);
-}
-
-/**
- * Validação robusta de formato de e-mail
- */
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return emailRegex.test(email) && email.length <= CONFIG.MAX_FIELD_LENGTHS.email;
-}
-
-/**
- * Gera logs estruturados para o console do Deno
- */
-function structuredLog(level: 'INFO' | 'WARN' | 'ERROR', message: string, data?: any) {
-  const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] [${level}] ${message}`, data ? JSON.stringify(data) : "");
-}
-
-// --- HANDLERS PRINCIPAIS ---
-
-serve(async (req: Request) => {
-  // 1. Manuseio de Preflight (CORS)
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: CORS_HEADERS });
+function validateContactData(data: unknown): { valid: boolean; error?: string; data?: ContactData } {
+  if (!data || typeof data !== 'object') {
+    return { valid: false, error: 'Invalid request payload' };
   }
 
-  // 2. Inicialização de Clientes
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  const resendApiKey = Deno.env.get("RESEND_API_KEY") ?? "";
+  const { name, email, subject, message } = data as Record<string, unknown>;
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const resend = new Resend(resendApiKey);
+  if (!name || !email || !subject || !message) {
+    return { valid: false, error: 'Missing required fields' };
+  }
 
-  // Identificação do IP do cliente (considerando proxies do Supabase)
-  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+  if (typeof name !== 'string' || typeof email !== 'string' || 
+      typeof subject !== 'string' || typeof message !== 'string') {
+    return { valid: false, error: 'Invalid field types' };
+  }
+
+  if (!validateEmail(email)) {
+    return { valid: false, error: 'Invalid email address' };
+  }
+
+  if (name.length > 100 || subject.length > 200 || message.length > 2000) {
+    return { valid: false, error: 'Input exceeds maximum length' };
+  }
+
+  return { 
+    valid: true, 
+    data: { 
+      name, 
+      email, 
+      phone: typeof (data as Record<string, unknown>).phone === 'string' 
+        ? (data as Record<string, unknown>).phone as string 
+        : undefined,
+      subject, 
+      message 
+    } 
+  };
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  // Initialize Supabase client with service_role
+  const supabase = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  );
 
   try {
-    structuredLog('INFO', 'Nova requisição de contato recebida', { ip: clientIp });
+    logStep('Function started');
 
-    // 3. Verificações de Cabeçalho e Tamanho
-    const contentType = req.headers.get("content-type");
-    if (!contentType?.includes("application/json")) {
-      throw { status: 415, message: "Tipo de conteúdo não suportado. Use JSON." };
+    // Validate content type
+    const contentType = req.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return new Response(
+        JSON.stringify({ error: 'Content-Type must be application/json' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
-    const contentLength = parseInt(req.headers.get("content-length") || "0");
-    if (contentLength > CONFIG.MAX_PAYLOAD_SIZE) {
-      throw { status: 413, message: "Corpo da requisição excede o limite permitido." };
+    // Check payload size
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_PAYLOAD_SIZE) {
+      return new Response(
+        JSON.stringify({ error: 'Payload too large' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 413 }
+      );
     }
 
-    // 4. Parsing e Validação de Estrutura
-    const body: RequestPayload = await req.json();
-    const { 
-      name, email, phone, subject, message, 
-      website_url, submission_token 
-    } = body;
+    const rawData = await req.json();
 
-    // 5. CAMADA DE SEGURANÇA 1: Honeypot
-    if (website_url) {
-      structuredLog('WARN', 'Honeypot ativado. Bot detectado.', { ip: clientIp });
-      await supabase.from("security_incidents").insert({
-        ip_address: clientIp,
-        event_type: "SPAM_ATTEMPT",
-        severity: "warning",
-        details: { reason: "Honeypot field filled", email }
-      });
-      return new Response(JSON.stringify({ error: "Spam block activated" }), { status: 403, headers: CORS_HEADERS });
+    // Validate input data
+    const validation = validateContactData(rawData);
+    if (!validation.valid || !validation.data) {
+      logStep('Validation failed', { error: validation.error });
+      return new Response(
+        JSON.stringify({ error: validation.error }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      );
     }
 
-    // 6. CAMADA DE SEGURANÇA 2: Validação de Tempo (Token)
-    if (!submission_token) {
-      throw { status: 400, message: "Token de segurança ausente." };
-    }
-    
-    try {
-      const decodedToken = atob(submission_token);
-      const startTime = parseInt(decodedToken);
-      const currentTime = Date.now();
-      const elapsed = currentTime - startTime;
+    // Sanitize all inputs
+    const name = sanitizeString(validation.data.name, 100);
+    const email = validation.data.email.trim().toLowerCase();
+    const phone = validation.data.phone ? sanitizeString(validation.data.phone, 20) : 'Não informado';
+    const subject = sanitizeString(validation.data.subject, 200);
+    const message = sanitizeString(validation.data.message, 2000);
 
-      if (elapsed < CONFIG.MIN_SUBMISSION_TIME) {
-        structuredLog('WARN', 'Submissão rápida demais (Bot)', { elapsed, ip: clientIp });
-        return new Response(JSON.stringify({ error: "Submission too fast" }), { status: 403, headers: CORS_HEADERS });
-      }
-      
-      if (elapsed > CONFIG.MAX_SUBMISSION_TIME) {
-        throw new Error("Token expirado");
-      }
-    } catch (e) {
-      throw { status: 400, message: "Token de segurança inválido ou expirado." };
-    }
+    logStep('Sending contact email', { email, subject });
 
-    // 7. CAMADA DE SEGURANÇA 3: Rate Limiting Persistente
-    const { count, error: countError } = await supabase
-      .from("contact_submissions")
-      .select("*", { count: 'exact', head: true })
-      .eq("ip_address", clientIp)
-      .gt("created_at", new Date(Date.now() - CONFIG.RATE_LIMIT_WINDOW).toISOString());
+    // Escape HTML for email content
+    const safeName = escapeHtml(name);
+    const safeSubject = escapeHtml(subject);
+    const safeMessage = escapeHtml(message).replace(/\n/g, '<br>');
+    const safePhone = escapeHtml(phone);
 
-    if (countError) structuredLog('ERROR', 'Erro ao verificar Rate Limit', countError);
-
-    if (count && count >= CONFIG.RATE_LIMIT_MAX) {
-      structuredLog('WARN', 'Limite de taxa excedido', { ip: clientIp });
-      return new Response(JSON.stringify({ 
-        error: "Muitas mensagens enviadas. Por favor, tente novamente em 1 hora." 
-      }), { status: 429, headers: CORS_HEADERS });
-    }
-
-    // 8. CAMADA DE SEGURANÇA 4: Filtro de Conteúdo (Keyword Scanner)
-    const fullText = `${subject} ${message} ${name}`.toLowerCase();
-    const containsSpam = SPAM_KEYWORDS.some(word => fullText.includes(word));
-    
-    if (containsSpam) {
-      structuredLog('WARN', 'Palavra de spam detectada', { ip: clientIp });
-      await supabase.from("security_incidents").insert({
-        ip_address: clientIp,
-        event_type: "SPAM_ATTEMPT",
-        severity: "info",
-        details: { reason: "Keyword blacklist match", content: fullText.slice(0, 100) }
-      });
-      return new Response(JSON.stringify({ error: "Your message was flagged as spam." }), { status: 400, headers: CORS_HEADERS });
-    }
-
-    // 9. Higienização Final dos Dados
-    if (!name || !email || !subject || !message) {
-      throw { status: 400, message: "Campos obrigatórios ausentes." };
-    }
-
-    if (!isValidEmail(email)) {
-      throw { status: 400, message: "Endereço de e-mail inválido." };
-    }
-
-    const cleanName = sanitizeInput(name, CONFIG.MAX_FIELD_LENGTHS.name);
-    const cleanEmail = email.toLowerCase().trim();
-    const cleanSubject = sanitizeInput(subject, CONFIG.MAX_FIELD_LENGTHS.subject);
-    const cleanMessage = sanitizeInput(message, CONFIG.MAX_FIELD_LENGTHS.message);
-    const cleanPhone = sanitizeInput(phone || "N/A", CONFIG.MAX_FIELD_LENGTHS.phone);
-
-    // Preparação de dados seguros para o Template HTML
-    const safeName = escapeHTML(cleanName);
-    const safeSubject = escapeHTML(cleanSubject);
-    const safePhone = escapeHTML(cleanPhone);
-    const safeMessageHtml = escapeHTML(cleanMessage).replace(/\n/g, '<br>');
-
-    // 10. Execução de Serviços Externos (E-mail e Banco)
-    structuredLog('INFO', 'Processando envio de e-mails...', { to: cleanEmail });
-
-    const emailPromises = [
-      // E-mail para o Administrador
-      resend.emails.send({
-        from: CONFIG.EMAIL_SENDER,
-        to: [CONFIG.ADMIN_RECIPIENT],
-        subject: `[TIKVAH] Novo Contato: ${safeSubject}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <div style="background-color: #f4f7f6; padding: 20px; border-bottom: 3px solid #005a87;">
-              <h2 style="color: #005a87; margin: 0;">Nova solicitação de contato</h2>
-            </div>
-            <div style="padding: 20px; border: 1px solid #ddd; border-top: none;">
-              <p><strong>Nome:</strong> ${safeName}</p>
-              <p><strong>E-mail:</strong> <a href="mailto:${cleanEmail}">${cleanEmail}</a></p>
-              <p><strong>Telefone:</strong> ${safePhone}</p>
-              <p><strong>Assunto:</strong> ${safeSubject}</p>
-              <div style="margin-top: 20px; padding: 15px; background: #fff9e6; border-left: 5px solid #ffcc00;">
-                <h4 style="margin-top: 0;">Mensagem:</h4>
-                ${safeMessageHtml}
-              </div>
-              <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-              <small style="color: #888;">Enviado via Tikvah Gateway | IP: ${clientIp}</small>
-            </div>
+    // Send notification email to admin
+    const adminEmailResponse = await resend.emails.send({
+      from: 'Tikvah Psycem <onboarding@resend.dev>',
+      to: ['suporte.oficina.psicologo@proton.me'],
+      subject: `Nova mensagem de contato: ${safeSubject}`,
+      html: `
+        <!DOCTYPE html>
+        <html lang="pt">
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1a365d;">Nova mensagem de contato recebida</h2>
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3182ce;">
+            <p style="margin: 8px 0;"><strong>Nome:</strong> ${safeName}</p>
+            <p style="margin: 8px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 8px 0;"><strong>Telefone:</strong> ${safePhone}</p>
+            <p style="margin: 8px 0;"><strong>Assunto:</strong> ${safeSubject}</p>
           </div>
-        `
-      }),
-      // E-mail de Confirmação para o Usuário
-      resend.emails.send({
-        from: CONFIG.EMAIL_SENDER,
-        to: [cleanEmail],
-        subject: 'Recebemos sua mensagem | Tikvah Psychological Center',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
-            <h2 style="color: #005a87;">Olá, ${safeName}!</h2>
-            <p>Obrigado por entrar em contato com o <strong>Tikvah Psychological Center</strong>.</p>
-            <p>Informamos que sua mensagem sobre <em>"${safeSubject}"</em> foi recebida com sucesso por nossa equipe de suporte.</p>
-            <div style="padding: 15px; border-radius: 8px; background: #f9f9f9; border: 1px solid #ededed;">
-              <p style="margin: 0; color: #666;">Responderemos ao seu e-mail em um prazo máximo de 24 horas úteis.</p>
-            </div>
-            <p>Atenciosamente,<br><strong>Equipe Tikvah</strong></p>
-            <footer style="margin-top: 30px; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 10px;">
-              Avenida 24 de Julho, Nº 797, 1º Andar, Maputo, Moçambique.
-            </footer>
+          <h3 style="color: #2d3748;">Mensagem:</h3>
+          <div style="background: #fff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+            ${safeMessage}
           </div>
-        `
-      })
-    ];
-
-    // Executa envios e auditoria em paralelo para máxima performance
-    const results = await Promise.allSettled([
-      ...emailPromises,
-      supabase.from("contact_submissions").insert({
-        name: cleanName,
-        email: cleanEmail,
-        phone: cleanPhone,
-        subject: cleanSubject,
-        message: cleanMessage,
-        ip_address: clientIp,
-        user_agent: req.headers.get("user-agent") || "unknown"
-      })
-    ]);
-
-    // Verifica se houve falha crítica nos envios
-    const emailFailures = results.filter(r => r.status === 'rejected');
-    if (emailFailures.length > 0) {
-      structuredLog('ERROR', 'Falha parcial no envio de e-mails', emailFailures);
-    }
-
-    // 11. Resposta Final de Sucesso
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Mensagem enviada com sucesso!",
-        ref: crypto.randomUUID().slice(0, 8)
-      }), 
-      { status: 200, headers: CORS_HEADERS }
-    );
-
-  } catch (error: any) {
-    // 12. Tratamento de Erros Centralizado
-    const statusCode = error.status || 500;
-    const errorMessage = error.message || "Erro interno no processamento.";
-
-    structuredLog('ERROR', `Erro capturado: ${errorMessage}`, { 
-      status: statusCode, 
-      stack: error.stack 
+          <p style="color: #718096; font-size: 12px; margin-top: 20px;">
+            Recebido em: ${new Date().toLocaleString('pt-BR', { timeZone: 'Africa/Maputo' })}
+          </p>
+        </body>
+        </html>
+      `,
     });
 
-    // Tenta registrar o erro no banco para auditoria futura
-    await supabase.from("security_incidents").insert({
-      ip_address: clientIp,
-      event_type: "SYSTEM_ERROR",
-      severity: "critical",
-      details: { error: errorMessage, status: statusCode }
+    // Send confirmation email to user
+    const userEmailResponse = await resend.emails.send({
+      from: 'Tikvah Psycem <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Mensagem recebida - Obrigado pelo contato!',
+      html: `
+        <!DOCTYPE html>
+        <html lang="pt">
+        <head><meta charset="UTF-8"></head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #1a365d;">Olá, ${safeName}!</h2>
+          <p style="color: #4a5568;">Recebemos sua mensagem e entraremos em contato em breve.</p>
+          
+          <div style="background: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #2d3748; margin-top: 0;">Resumo da sua mensagem:</h3>
+            <p><strong>Assunto:</strong> ${safeSubject}</p>
+            <div style="background: #fff; padding: 15px; border: 1px solid #e2e8f0; border-radius: 4px; margin-top: 10px;">
+              ${safeMessage}
+            </div>
+          </div>
+          
+          <p style="color: #4a5568;">Agradecemos o seu interesse e responderemos em até 24 horas úteis.</p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 20px 0;">
+          
+          <p style="color: #718096; font-size: 12px;">
+            Tikvah Psychological Center<br>
+            Avenida 24 de Julho, Nº 797, 1º Andar<br>
+            Maputo, Moçambique
+          </p>
+        </body>
+        </html>
+      `,
+    });
+
+    logStep('Emails sent successfully', { 
+      adminEmailId: adminEmailResponse.data?.id, 
+      userEmailId: userEmailResponse.data?.id 
+    });
+
+    // Log to audit table
+    await supabase.from('audit_logs').insert({
+      action: 'CONTACT_EMAIL_SENT',
+      table_name: 'contacts',
+      new_data: { email, subject, timestamp: new Date().toISOString() }
     }).catch(() => {});
 
     return new Response(
       JSON.stringify({ 
-        error: errorMessage,
-        code: statusCode === 500 ? "INTERNAL_SERVER_ERROR" : "VALIDATION_ERROR"
-      }), 
-      { status: statusCode, headers: CORS_HEADERS }
+        success: true, 
+        message: 'Email enviado com sucesso'
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      }
+    );
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep('Error sending email', { error: errorMessage });
+    
+    return new Response(
+      JSON.stringify({ 
+        error: 'Failed to send message',
+        code: 'EMAIL_SEND_ERROR'
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      }
     );
   }
 });
-
-/**
- * DATABASE SCHEMA REQUIREMENT (SQL):
- * * CREATE TABLE contact_submissions (
- * id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
- * created_at TIMESTAMPTZ DEFAULT now(),
- * name TEXT,
- * email TEXT,
- * phone TEXT,
- * subject TEXT,
- * message TEXT,
- * ip_address TEXT,
- * user_agent TEXT
- * );
- * * CREATE TABLE security_incidents (
- * id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
- * created_at TIMESTAMPTZ DEFAULT now(),
- * ip_address TEXT,
- * event_type TEXT,
- * severity TEXT,
- * details JSONB
- * );
- */
